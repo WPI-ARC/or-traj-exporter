@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (or-traj-exporter)
 
-message (STATUS "Creating Makefile for or-robotsim-exporter")
+message (STATUS "Creating Makefile for or-traj-exporter")
 
 IF(NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -36,5 +36,5 @@ set ( project_src src/converter.cpp )
 set ( project_hdr src/converter.hpp src/joint_map.hpp )
 
 add_executable (orTrajExporter ${project_src} ${project_hdr})
-target_link_libraries (orTrajExporter ${LIBXML2_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries (orTrajExporter ${LIBXML2_LIBRARIES})
 
