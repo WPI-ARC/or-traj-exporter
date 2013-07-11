@@ -70,6 +70,10 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     xmlNodePtr root;
     xmlChar* tmp;
 
+    //std::string robot_name = "Hubo";
+    //std::string robot_name = "rlhuboplus";
+    std::string robot_name = "drchubo-v2";
+
     doc = xmlParseFile(filename.c_str());
     if(doc==NULL)
     {
@@ -145,7 +149,8 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
 
         std::getline( ss, line, ' ' );
         offsets.back().second.robot_name = line;
-        //cout << offsets.back().second.robot_name << endl;
+        //cout << "ROBOT NAME IS : " << offsets.back().second.robot_name << endl;
+	//robot_name = offsets.back().second.robot_name;
 
         node = node->next->next;
     }
@@ -203,9 +208,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     traj.deltatime.resize(count);
 
     cout << "count : " << count << endl;
-
-    //std::string robot_name = "Hubo";
-    std::string robot_name = "rlhuboplus";
 
     int ith_value=0;
     int configuration_offset=0;
@@ -285,14 +287,13 @@ void Converter::setPath()
     mPath.clear();
 
     // Wheel turning
-    std::vector<int> traj_indexes(7);
+    std::vector<int> traj_indexes(6);
     traj_indexes[0] = 0;
     traj_indexes[1] = 1;
     traj_indexes[2] = 2;
-    traj_indexes[3] = 1;
-    traj_indexes[4] = 2;
-    traj_indexes[5] = 1;
-    traj_indexes[6] = 3;
+    traj_indexes[3] = 3;
+    traj_indexes[4] = 4;
+    traj_indexes[5] = 5;
 
     // Waving
     //    std::vector<int> traj_indexes(2);
@@ -341,7 +342,7 @@ void Converter::loadTrajectoryFromFiles()
         //std::string dir = "../trajs/";
 
         mTrajs.clear();
-        mTrajs.resize(4);
+        mTrajs.resize(6);
 
         loadTrajectoryFromFile( dir_name + "movetraj0.txt", mTrajs[0] );
         loadTrajectoryFromFile( dir_name + "movetraj1.txt", mTrajs[1] );
@@ -349,6 +350,8 @@ void Converter::loadTrajectoryFromFiles()
         // comment the following for waving
         loadTrajectoryFromFile( dir_name + "movetraj2.txt", mTrajs[2] );
         loadTrajectoryFromFile( dir_name + "movetraj3.txt", mTrajs[3] );
+        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
+        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
 
         //setHuboJointIndicies();
         setPath();
@@ -414,14 +417,31 @@ void Converter::saveToRobotSimFormat()
 
     double time_on_path=0.0;
 
+//    int size_conf=0;
+//    for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
+//         it_map!=mMaps.or_drc.end(); it_map++ )
+//    {
+//        if( it_map->second != -1 )
+//            size_conf++;
+//    }
+
+    //cout << "size_conf : " << size_conf << endl;
+
     for( it=mPath.begin(); it != mPath.end(); it++ )
     {
-        Eigen::VectorXd q(Eigen::VectorXd::Zero((*it).size()+6));
+        Eigen::VectorXd q((*it).size()+6);
 
-        for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
-             it_map!=mMaps.or_map.end(); it_map++ )
+//        cout << q.size() << endl;
+//        cout << (*it).size() << endl;
+
+        for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
+             it_map!=mMaps.or_drc.end(); it_map++ )
         {
-            q( mMaps.rs_map[it_map->first] + 6 ) = (*it)( it_map->second );
+            if( it_map->second == -1 )
+                continue;
+
+            //cout << it_map->first << endl;
+            q( mMaps.rs_drc[it_map->first] + 6 ) = (*it)( it_map->second );
         }
 
         s << time_on_path << "\t";
@@ -447,7 +467,7 @@ int main(int argc, char** argv)
         if(argv[i][0] == '-')
         {
             if(0==strcmp(argv[i],"-d")) {
-                dir_name = argv[i+1];
+                dir_name = std::string(argv[i+1]) + "/";
                 i++;
             }
             else {
@@ -460,6 +480,5 @@ int main(int argc, char** argv)
     Converter conv;
     conv.loadTrajectoryFromFiles();
     conv.saveToRobotSimFormat();
-
     return 0;
 }

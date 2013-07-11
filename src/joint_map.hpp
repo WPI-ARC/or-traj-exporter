@@ -11,6 +11,8 @@ public:
     std::map<std::string,int> or_map;
     std::map<std::string,int> rs_map;
     std::map<std::string,int> dt_map;
+    std::map<std::string,int> or_drc;
+    std::map<std::string,int> rs_drc;
 };
 
 void JointMaps::setMaps()
@@ -70,6 +72,109 @@ void JointMaps::setMaps()
     rs_map["RKP"]= 55-1;
     rs_map["RAP"]= 56-1;
     rs_map["RAR"]= 57-1;
+
+
+
+
+
+
+    or_drc["LSP"]=       0;           //0         Body_Torso  Body_LSP
+    or_drc["LSR"]=       1;           //1         Body_LSP    Body_LSR
+    or_drc["LSY"]=       2;           //2         Body_LSR    Body_LSY
+    or_drc["LEP"]=       3;           //3         Body_LSY    Body_LEP
+    or_drc["LWY"]=       4;           //4         Body_LEP    Body_LWY
+    or_drc["LWP"]=       5;           //5         Body_LWY    Body_LWP
+    or_drc["LWR"]=       6;           //6         Body_LWP    Body_LWR
+    or_drc["TSY"]=       10;          //10        Body_Torso  Body_TSY
+    or_drc["LHY"]=       11;          //11        Body_TSY    Body_LHY
+    or_drc["LHR"]=       12;          //12        Body_LHY    Body_LHR
+    or_drc["LHP"]=       13;          //13        Body_LHR    Body_LHP
+    or_drc["LKP"]=       14;          //14        Body_LHP    Body_LKP
+    or_drc["LAP"]=       15;          //15        Body_LKP    Body_LAP
+    or_drc["LAR"]=       16;          //16        Body_LAP    Body_LAR
+    or_drc["NKY"]=       17;          //17        Body_Torso  Body_NKY
+    or_drc["NK1"]=       18;          //18        Body_NKY    Body_NK1
+    or_drc["NK2"]=       -1;          //19        Body_NK1    Body_NK2
+    or_drc["RSP"]=       26;          //26        Body_Torso  Body_RSP
+    or_drc["RSR"]=       27;          //27        Body_RSP    Body_RSR
+    or_drc["RSY"]=       28;          //28        Body_RSR    Body_RSY
+    or_drc["REP"]=       29;          //29        Body_RSY    Body_REP
+    or_drc["RWY"]=       30;          //30        Body_REP    Body_RWY
+    or_drc["RWP"]=       31;          //31        Body_RWY    Body_RWP
+    or_drc["RWR"]=       32;          //32        Body_RWP    Body_RWR
+    or_drc["RHY"]=       36;          //36        Body_TSY    Body_RHY
+    or_drc["RHR"]=       37;          //37        Body_RHY    Body_RHR
+    or_drc["RHP"]=       38;          //38        Body_RHR    Body_RHP
+    or_drc["RKP"]=       39;          //39        Body_RHP    Body_RKP
+    or_drc["RAP"]=       40;          //40        Body_RKP    Body_RAP
+    or_drc["RAR"]=       41;          //41        Body_RAP    Body_RAR
+
+//    or_drc["LF11"]=      7;           //7         Body_LWR    Body_LF11
+//    or_drc["LF12"]=      8;           //8         Body_LF11   Body_LF12
+//    or_drc["LF13"]=      9;           //9         Body_LF12   Body_LF13
+//    or_drc["LF21"]=      20;          //20        Body_LWR    Body_LF21
+//    or_drc["LF22"]=      21;          //21        Body_LF21   Body_LF22
+//    or_drc["LF23"]=      22;          //22        Body_LF22   Body_LF23
+//    or_drc["LF31"]=      23;          //23        Body_LWR    Body_LF31
+//    or_drc["LF32"]=      24;          //24        Body_LF31   Body_LF32
+//    or_drc["LF33"]=      25;          //25        Body_LF32   Body_LF33
+//    or_drc["RF11"]=      33;          //33        Body_RWR    Body_RF11
+//    or_drc["RF12"]=      34;          //34        Body_RF11   Body_RF12
+//    or_drc["RF13"]=      35;          //35        Body_RF12   Body_RF13
+//    or_drc["RF21"]=      42;          //42        Body_RWR    Body_RF21
+//    or_drc["RF22"]=      43;          //43        Body_RF21   Body_RF22
+//    or_drc["RF23"]=      44;          //44        Body_RF22   Body_RF23
+//    or_drc["RF31"]=      45;          //45        Body_RWR    Body_RF31
+//    or_drc["RF32"]=      46;          //46        Body_RF31   Body_RF32
+//    or_drc["RF33"]=      47;          //47        Body_RF32   Body_RF33
+//    or_drc["RF41"]=      48;          //48        Body_RWR    Body_RF41
+//    or_drc["RF42"]=      49;          //49        Body_RF41   Body_RF42
+//    or_drc["RF43"]=      50;          //50        Body_RF42   Body_RF43
+
+
+
+
+
+
+
+    //rs_drc["Hip", 5
+    rs_drc["LHY"]= 6-6;
+    rs_drc["LHR"]= 7-6;
+    rs_drc["LHP"]= 8-6;
+    rs_drc["LKP"]= 9-6;
+    rs_drc["LAP"]= 10-6;
+    rs_drc["LAR"]= 11-6;
+    rs_drc["RHY"]= 12-6;
+    rs_drc["RHR"]= 13-6;
+    rs_drc["RHP"]= 14-6;
+    rs_drc["RKP"]= 15-6;
+    rs_drc["RAP"]= 16-6;
+    rs_drc["RAR"]= 17-6;
+    rs_drc["WST"]= 18-6;
+    rs_drc["LSP"]= 19-6;
+    rs_drc["LSR"]= 20-6;
+    rs_drc["LSY"]= 21-6;
+    rs_drc["LEP"]= 22-6;
+    rs_drc["LWY"]= 23-6;
+    rs_drc["LWP"]= 24-6;
+    rs_drc["LWR"]= 25-6;
+    rs_drc["NKY"]= 29-6;
+    rs_drc["NK1"]= 30-6;
+    rs_drc["RSP"]= 31-6;
+    rs_drc["RSR"]= 32-6;
+    rs_drc["RSY"]= 33-6;
+    rs_drc["REP"]= 34-6;
+    rs_drc["RWY"]= 35-6;
+    rs_drc["RWP"]= 36-6;
+    rs_drc["RWR"]= 37-6;
+
+//    rs_drc["LF1"]= 26-6;
+//    rs_drc["LF2"]= 27-6;
+//    rs_drc["LF3"]= 28-6;
+//    rs_drc["RF1"]= 38-6;
+//    rs_drc["RF2"]= 39-6;
+//    rs_drc["RF3"]= 40-6;
+
 };
 
 #endif // JOINT_MAP_HPP
