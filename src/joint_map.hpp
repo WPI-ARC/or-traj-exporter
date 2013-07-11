@@ -77,7 +77,7 @@ void JointMaps::setMaps()
 
 
 
-
+    // Version 2
     or_drc["LSP"]=       0;           //0         Body_Torso  Body_LSP
     or_drc["LSR"]=       1;           //1         Body_LSP    Body_LSR
     or_drc["LSY"]=       2;           //2         Body_LSR    Body_LSY
@@ -137,7 +137,7 @@ void JointMaps::setMaps()
 
 
 
-    //rs_drc["Hip", 5
+    // Version 1
     rs_drc["LHY"]= 6-6;
     rs_drc["LHR"]= 7-6;
     rs_drc["LHP"]= 8-6;
@@ -150,7 +150,7 @@ void JointMaps::setMaps()
     rs_drc["RKP"]= 15-6;
     rs_drc["RAP"]= 16-6;
     rs_drc["RAR"]= 17-6;
-    rs_drc["WST"]= 18-6;
+    rs_drc["TSY"]= 18-6;
     rs_drc["LSP"]= 19-6;
     rs_drc["LSR"]= 20-6;
     rs_drc["LSY"]= 21-6;
@@ -167,13 +167,56 @@ void JointMaps::setMaps()
     rs_drc["RWY"]= 35-6;
     rs_drc["RWP"]= 36-6;
     rs_drc["RWR"]= 37-6;
+    rs_drc["LF1"]= 26-6;
+    rs_drc["LF2"]= 27-6;
+    rs_drc["LF3"]= 28-6;
+    rs_drc["RF1"]= 38-6;
+    rs_drc["RF2"]= 39-6;
+    rs_drc["RF3"]= 40-6;
 
-//    rs_drc["LF1"]= 26-6;
-//    rs_drc["LF2"]= 27-6;
-//    rs_drc["LF3"]= 28-6;
-//    rs_drc["RF1"]= 38-6;
-//    rs_drc["RF2"]= 39-6;
-//    rs_drc["RF3"]= 40-6;
+
+//    // Version 2
+//    //rs_drc["Hip"]= 5;
+//    //rs_drc["leftFoot"]= 12;
+//    //rs_drc["leftPalm"]= 31;
+//    //rs_drc["rightFoot"]= 19;
+//    rs_drc["LHY"]= 6;
+//    rs_drc["LHR"]= 7;
+//    rs_drc["LHP"]= 8;
+//    rs_drc["LKP"]= 9;
+//    rs_drc["LAP"]= 10;
+//    rs_drc["LAR"]= 11;
+//    rs_drc["RHY"]= 13;
+//    rs_drc["RHR"]= 14;
+//    rs_drc["RHP"]= 15;
+//    rs_drc["RKP"]= 16;
+//    rs_drc["RAP"]= 17;
+//    rs_drc["RAR"]= 18;
+//    rs_drc["TSY"]= 20; // Torso
+//    rs_drc["LSP"]= 21;
+//    rs_drc["LSR"]= 22;
+//    rs_drc["LSY"]= 23;
+//    rs_drc["LEP"]= 24;
+//    rs_drc["LWY"]= 25;
+//    rs_drc["LWP"]= 26;
+//    rs_drc["LWR"]= 27;
+//    rs_drc["NKY"]= 32;
+//    rs_drc["NK1"]= 33;
+//    rs_drc["RSP"]= 34;
+//    rs_drc["RSR"]= 35;
+//    rs_drc["RSY"]= 36;
+//    rs_drc["REP"]= 37;
+//    rs_drc["RWY"]= 38;
+//    rs_drc["RWP"]= 39;
+//    rs_drc["RWR"]= 40;
+
+//    rs_drc["LF1"]= 28;
+//    rs_drc["LF2"]= 29;
+//    rs_drc["LF3"]= 30;
+//    rs_drc["RF1"]= 41;
+//    rs_drc["RF2"]= 42;
+//    rs_drc["RF3"]= 43;
+//    //rs_drc["rightPalm"]= 44;
 
 };
 

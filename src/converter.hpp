@@ -73,6 +73,7 @@ public:
     void closeHuboHands( Eigen::VectorXd& q );
     void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
     void setHuboJointIndicies();
+    void checkMaps();
 
 private:
     std::vector<OpenraveTrajectory> mTrajs;

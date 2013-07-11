@@ -287,7 +287,7 @@ void Converter::setPath()
     mPath.clear();
 
     // Wheel turning
-    std::vector<int> traj_indexes(6);
+    std::vector<int> traj_indexes(4);
     traj_indexes[0] = 0;
     traj_indexes[1] = 1;
     traj_indexes[2] = 2;
@@ -342,7 +342,7 @@ void Converter::loadTrajectoryFromFiles()
         //std::string dir = "../trajs/";
 
         mTrajs.clear();
-        mTrajs.resize(6);
+        mTrajs.resize(4);
 
         loadTrajectoryFromFile( dir_name + "movetraj0.txt", mTrajs[0] );
         loadTrajectoryFromFile( dir_name + "movetraj1.txt", mTrajs[1] );
@@ -350,8 +350,8 @@ void Converter::loadTrajectoryFromFiles()
         // comment the following for waving
         loadTrajectoryFromFile( dir_name + "movetraj2.txt", mTrajs[2] );
         loadTrajectoryFromFile( dir_name + "movetraj3.txt", mTrajs[3] );
-        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
-        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
+//        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
+//        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
 
         //setHuboJointIndicies();
         setPath();
@@ -417,20 +417,11 @@ void Converter::saveToRobotSimFormat()
 
     double time_on_path=0.0;
 
-//    int size_conf=0;
-//    for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
-//         it_map!=mMaps.or_drc.end(); it_map++ )
-//    {
-//        if( it_map->second != -1 )
-//            size_conf++;
-//    }
-
-    //cout << "size_conf : " << size_conf << endl;
-
     for( it=mPath.begin(); it != mPath.end(); it++ )
     {
-        Eigen::VectorXd q((*it).size()+6);
+        Eigen::VectorXd q(Eigen::VectorXd::Zero(35+6));
 
+//        cout << mMaps.rs_drc.size() << endl;
 //        cout << q.size() << endl;
 //        cout << (*it).size() << endl;
 
@@ -441,7 +432,7 @@ void Converter::saveToRobotSimFormat()
                 continue;
 
             //cout << it_map->first << endl;
-            q( mMaps.rs_drc[it_map->first] + 6 ) = (*it)( it_map->second );
+            q( mMaps.rs_drc[it_map->first] ) = (*it)( it_map->second );
         }
 
         s << time_on_path << "\t";
@@ -460,8 +451,25 @@ void Converter::saveToRobotSimFormat()
     cout << "Trajectory Saved!!!" << endl;
 }
 
+void Converter::checkMaps()
+{
+    cout << mMaps.or_drc.size() << endl;
+    cout << mMaps.rs_drc.size() << endl;
+
+    for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
+         it_map!=mMaps.or_drc.end(); it_map++ )
+    {
+        cout << it_map->first  << " : " << mMaps.rs_drc[it_map->first] << endl;
+    }
+
+    cout << mMaps.or_drc.size() << endl;
+    cout << mMaps.rs_drc.size() << endl;
+}
+
 int main(int argc, char** argv)
 {
+    bool check_map=false;
+
     for(int i=1;i<argc;i++)
     {
         if(argv[i][0] == '-')
@@ -469,6 +477,11 @@ int main(int argc, char** argv)
             if(0==strcmp(argv[i],"-d")) {
                 dir_name = std::string(argv[i+1]) + "/";
                 i++;
+            }
+            else if(0==strcmp(argv[i],"-c")) {
+                i++;
+                check_map = true;
+                break;
             }
             else {
                 printf("Unknown option %s",argv[i]);
@@ -478,6 +491,13 @@ int main(int argc, char** argv)
     }
 
     Converter conv;
+
+    if(check_map)
+    {
+        conv.checkMaps();
+        return 0;
+    }
+
     conv.loadTrajectoryFromFiles();
     conv.saveToRobotSimFormat();
     return 0;
