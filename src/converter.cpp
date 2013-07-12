@@ -59,6 +59,19 @@ bool convert_text_to_num(T& t,
     return !(iss >> f >> t).fail();
 }
 
+Converter::Converter()
+{
+//    mORRobotName = "Hubo";
+//    mORRobotName = "rlhuboplus";
+    mORRobotName = "drchubo-v2";
+
+//    mRSNbDof = 41; // V1
+    mRSNbDof = 61; // V2
+
+//    mMaps.setHuboPlusMaps();
+//    mMaps.setDrcHuboV1Maps();
+    mMaps.setDrcHuboV2Maps();
+}
 
 void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj )
 {
@@ -69,10 +82,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     xmlNodePtr cur;
     xmlNodePtr root;
     xmlChar* tmp;
-
-    //std::string robot_name = "Hubo";
-    //std::string robot_name = "rlhuboplus";
-    std::string robot_name = "drchubo-v2";
 
     doc = xmlParseFile(filename.c_str());
     if(doc==NULL)
@@ -97,12 +106,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     }
 
     cur = root->xmlChildrenNode->next;
-
-    //    while (cur != NULL)
-    //    {
-    //        cout << cur->name << endl;
-    //        cur = cur->next->next;
-    //    }
 
     if (xmlStrcmp(cur->name, xmlCharStrdup("configuration")))
     {
@@ -138,19 +141,15 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
             return;
         }
         convert_text_to_num<int>( offsets.back().second.nb_dofs, (char*)tmp, std::dec );
-        //cout << offsets.back().second.nb_dofs << endl;
 
         std::stringstream ss( (char *)xmlGetProp( node, xmlCharStrdup("name") ) );
         std::string line;
 
         std::getline( ss, line, ' ' );
         offsets.back().second.type = line;
-        //cout << offsets.back().second.type << endl;
 
         std::getline( ss, line, ' ' );
         offsets.back().second.robot_name = line;
-        //cout << "ROBOT NAME IS : " << offsets.back().second.robot_name << endl;
-	//robot_name = offsets.back().second.robot_name;
 
         node = node->next->next;
     }
@@ -158,7 +157,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     std::sort( offsets.begin(), offsets.end(), fct_sort );
 
     // ------------------------------------------------
-
     cur = cur->next->next;
 
     if (xmlStrcmp(cur->name, xmlCharStrdup("data")))
@@ -188,7 +186,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     }
 
     std::string configuration( (char*)(tmp) );
-    // cout << configuration << endl;
     std::stringstream ss( configuration );
     std::vector<double> values;
     std::string line;
@@ -217,7 +214,7 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
         for(int k=0;k<int(offsets.size());k++)
         {
             if( offsets[k].second.type != "deltatime" &&
-                    offsets[k].second.robot_name != robot_name )
+                    offsets[k].second.robot_name != mORRobotName )
             {
                 ith_value += offsets[k].second.nb_dofs;
                 continue;
@@ -247,8 +244,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
                 {
                     traj.positions[i][l++] = values[j];
                 }
-                //cout << "position : start = " << start << " , end = " << end << endl;
-                //cout << traj.positions[i].transpose() << endl;
             }
 
             if( offsets[k].second.type == "joint_velocities" )
@@ -260,8 +255,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
                 {
                     traj.velocities[i][l++] = values[j];
                 }
-                //cout <<  traj.velocities[i] << endl;
-                //cout << "velocities : start = " << start << " , end = " << end << endl;
             }
 
             if( offsets[k].second.type == "deltatime" )
@@ -274,7 +267,6 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
 
                 ith_value += configuration_offset;
                 configuration_offset = 0;
-                //cout << "deltatime : start = " << start << " , end = " << end << endl;
             }
         }
     }
@@ -287,7 +279,7 @@ void Converter::setPath()
     mPath.clear();
 
     // Wheel turning
-    std::vector<int> traj_indexes(4);
+    std::vector<int> traj_indexes(6);
     traj_indexes[0] = 0;
     traj_indexes[1] = 1;
     traj_indexes[2] = 2;
@@ -334,30 +326,20 @@ void Converter::setHuboJointIndicies()
 
 void Converter::loadTrajectoryFromFiles()
 {
-    Eigen::VectorXd q(57);
-
     if( mTrajs.empty() )
     {
-        //std::string dir = "/home/jmainpri/workspace/drc/wpi_openrave/hubo/matlab/";
-        //std::string dir = "../trajs/";
-
         mTrajs.clear();
-        mTrajs.resize(4);
+        mTrajs.resize(6);
 
         loadTrajectoryFromFile( dir_name + "movetraj0.txt", mTrajs[0] );
         loadTrajectoryFromFile( dir_name + "movetraj1.txt", mTrajs[1] );
-
-        // comment the following for waving
         loadTrajectoryFromFile( dir_name + "movetraj2.txt", mTrajs[2] );
         loadTrajectoryFromFile( dir_name + "movetraj3.txt", mTrajs[3] );
-//        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
-//        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
+        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
+        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
 
         //setHuboJointIndicies();
         setPath();
-
-        cout << "Set start confiuration of traj 0 " << endl;
-        q = mTrajs[0].positions[0];
     }
     else
     {
@@ -419,20 +401,21 @@ void Converter::saveToRobotSimFormat()
 
     for( it=mPath.begin(); it != mPath.end(); it++ )
     {
-        Eigen::VectorXd q(Eigen::VectorXd::Zero(35+6));
+        // Initializes joints to zero
+        Eigen::VectorXd q(Eigen::VectorXd::Zero(mRSNbDof));
 
 //        cout << mMaps.rs_drc.size() << endl;
 //        cout << q.size() << endl;
 //        cout << (*it).size() << endl;
 
-        for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
-             it_map!=mMaps.or_drc.end(); it_map++ )
+        for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
+             it_map!=mMaps.or_map.end(); it_map++ )
         {
             if( it_map->second == -1 )
                 continue;
 
             //cout << it_map->first << endl;
-            q( mMaps.rs_drc[it_map->first] ) = (*it)( it_map->second );
+            q( mMaps.rs_map[it_map->first] ) = (*it)( it_map->second );
         }
 
         s << time_on_path << "\t";
@@ -453,17 +436,22 @@ void Converter::saveToRobotSimFormat()
 
 void Converter::checkMaps()
 {
-    cout << mMaps.or_drc.size() << endl;
-    cout << mMaps.rs_drc.size() << endl;
+    int size_or_i =  mMaps.or_map.size();
+    int size_rs_i =  mMaps.rs_map.size();
 
-    for( std::map<std::string,int>::iterator it_map = mMaps.or_drc.begin();
-         it_map!=mMaps.or_drc.end(); it_map++ )
+    for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
+         it_map!=mMaps.or_map.end(); it_map++ )
     {
-        cout << it_map->first  << " : " << mMaps.rs_drc[it_map->first] << endl;
+        if( it_map->second == -1 )
+            continue;
+
+        cout << it_map->first  << " : " << mMaps.rs_map[it_map->first] << endl;
     }
 
-    cout << mMaps.or_drc.size() << endl;
-    cout << mMaps.rs_drc.size() << endl;
+    if( size_or_i == mMaps.or_map.size() && size_rs_i == mMaps.rs_map.size() )
+    {
+        cout << "OR keys are in RS map :-)" << endl;
+    }
 }
 
 int main(int argc, char** argv)

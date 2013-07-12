@@ -60,11 +60,7 @@ struct OpenraveTrajectory
 class Converter
 {
 public:
-    Converter()
-    {
-        mMaps.setMaps();
-    }
-
+    Converter();
     void loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj );
     void loadTrajectoryFromFiles();
     void saveToRobotSimFormat();
@@ -79,6 +75,8 @@ private:
     std::vector<OpenraveTrajectory> mTrajs;
     std::list<Eigen::VectorXd> mPath;
     JointMaps mMaps;
+    int mRSNbDof;
+    std::string mORRobotName;
 };
 
 #endif
