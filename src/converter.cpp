@@ -274,23 +274,34 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
     cout << "End trajectory parsing" << endl;
 }
 
+void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end )
+{
+    int nb_conf = 30;
+
+    Eigen::VectorXd q_inter = q;
+
+    for( int i=0;i<nb_conf;i++)
+    {
+        double alpha = i/double(nb_conf-1);
+        double theta = (1-alpha)*theta_init+alpha*theta_end;
+        cout << i << " : " << theta << endl;
+        closeDRCHuboHands( q_inter, theta );
+        mPath.push_back( q_inter );
+    }
+}
+
 void Converter::setPath()
 {
     mPath.clear();
 
     // Wheel turning
     std::vector<int> traj_indexes(6);
-    traj_indexes[0] = 0;
-    traj_indexes[1] = 1;
-    traj_indexes[2] = 2;
-    traj_indexes[3] = 3;
-    traj_indexes[4] = 4;
-    traj_indexes[5] = 5;
-
-    // Waving
-    //    std::vector<int> traj_indexes(2);
-    //    traj_indexes[0] = 0;
-    //    traj_indexes[1] = 1;
+    traj_indexes[0] = 0; // home  -> init
+    traj_indexes[1] = 1; // init  -> start
+    traj_indexes[2] = 2; // start -> goal
+    traj_indexes[3] = 3; // goal  -> start
+    traj_indexes[4] = 4; // start -> init
+    traj_indexes[5] = 5; // init  -> home
 
     for(int i=0;i<int(traj_indexes.size());i++)
     {
@@ -298,13 +309,32 @@ void Converter::setPath()
         {
             Eigen::VectorXd q = mTrajs[traj_indexes[i]].positions[j];
 
-//            if( traj_indexes[i] == 1 ) {
-//                //cout << "Close hands" << endl;
-//                closeHuboHands( q );
-//            }
+            double theta = 0;
+
+            if( traj_indexes[i] == 1 ) // start
+                theta = -0.2;
+            if( traj_indexes[i] == 2 ) // goal
+                theta = 0.2;
+
+            closeDRCHuboHands( q, theta ); // reset hands
 
             mPath.push_back( q );
         }
+
+        if( traj_indexes[i] == 0 ) // init
+        {
+            addClosingHandsConfigs( mPath.back(), 0, -0.2 );
+        }
+        if( traj_indexes[i] == 1 ) // start
+        {
+            addClosingHandsConfigs( mPath.back(), -0.2, 0.2 );
+        }
+        if( traj_indexes[i] == 2 ) // goal
+        {
+            addClosingHandsConfigs( mPath.back(), 0.2, 0 );
+        }
+
+        printDRCHuboHands( mPath.back() );
     }
 }
 
@@ -366,6 +396,75 @@ void Converter::closeHuboHands( Eigen::VectorXd& q )
     q( 42-6 ) = angle;
 }
 
+void Converter::closeDRCHuboHands( Eigen::VectorXd& q, double angle )
+{
+    // THESE ARE OR INDICES
+    //double angle = 0.3;
+
+    q( mMaps.or_map["LF11"] ) = angle;
+    q( mMaps.or_map["LF12"] ) = angle;
+    q( mMaps.or_map["LF13"] ) = angle;
+
+    q( mMaps.or_map["LF21"] ) = angle;
+    q( mMaps.or_map["LF22"] ) = angle;
+    q( mMaps.or_map["LF23"] ) = angle;
+
+    q( mMaps.or_map["LF31"] ) = angle;
+    q( mMaps.or_map["LF32"] ) = angle;
+    q( mMaps.or_map["LF33"] ) = angle;
+
+    q( mMaps.or_map["RF11"] ) = angle;
+    q( mMaps.or_map["RF12"] ) = angle;
+    q( mMaps.or_map["RF13"] ) = angle;
+
+    q( mMaps.or_map["RF21"] ) = angle;
+    q( mMaps.or_map["RF22"] ) = angle;
+    q( mMaps.or_map["RF23"] ) = angle;
+
+    q( mMaps.or_map["RF31"] ) = angle;
+    q( mMaps.or_map["RF32"] ) = angle;
+    q( mMaps.or_map["RF33"] ) = angle;
+
+    q( mMaps.or_map["RF41"] ) = angle;
+    q( mMaps.or_map["RF42"] ) = angle;
+    q( mMaps.or_map["RF43"] ) = angle;
+}
+
+void Converter::printDRCHuboHands( const Eigen::VectorXd& q )
+{
+    // THESE ARE OR INDICES
+    //double angle = 0.3;
+
+    cout << "--------------" << endl;
+    cout << "LF11 : " << q( mMaps.or_map["LF11"] ) << endl;
+    cout << "LF12 : " << q( mMaps.or_map["LF12"] ) << endl;
+    cout << "LF13 : " << q( mMaps.or_map["LF13"] ) << endl;
+
+    cout << "LF21 : " << q( mMaps.or_map["LF21"] ) << endl;
+    cout << "LF22 : " << q( mMaps.or_map["LF22"] ) << endl;
+    cout << "LF23 : " << q( mMaps.or_map["LF23"] ) << endl;
+
+    cout << "LF31 : " << q( mMaps.or_map["LF31"] ) << endl;
+    cout << "LF32 : " << q( mMaps.or_map["LF32"] ) << endl;
+    cout << "LF33 : " << q( mMaps.or_map["LF33"] ) << endl;
+
+    cout << "RF11 : " << q( mMaps.or_map["RF11"] ) << endl;
+    cout << "RF12 : " << q( mMaps.or_map["RF12"] ) << endl;
+    cout << "RF13 : " << q( mMaps.or_map["RF13"] ) << endl;
+
+    cout << "RF21 : " << q( mMaps.or_map["RF21"] ) << endl;
+    cout << "RF22 : " << q( mMaps.or_map["RF22"] ) << endl;
+    cout << "RF23 : " << q( mMaps.or_map["RF23"] ) << endl;
+
+    cout << "RF31 : " << q( mMaps.or_map["RF31"] ) << endl;
+    cout << "RF31 : " << q( mMaps.or_map["RF32"] ) << endl;
+    cout << "RF33 : " << q( mMaps.or_map["RF33"] ) << endl;
+
+    cout << "RF41 : " << q( mMaps.or_map["RF41"] ) << endl;
+    cout << "RF42 : " << q( mMaps.or_map["RF42"] ) << endl;
+    cout << "RF43 : " << q( mMaps.or_map["RF43"] ) << endl;
+}
+
 /// Setup hubo configuration
 void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
 {
@@ -388,11 +487,17 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
     q = hubo_config;
 }
 
-void Converter::saveToRobotSimFormat()
+void Converter::saveToRobotSimFormat(bool config_file)
 {
     std::list<Eigen::VectorXd>::const_iterator it;
     std::ofstream s;
-    std::string filename( dir_name + "robot_commands.log" );
+    std::string filename;
+
+    if( config_file )
+        filename = dir_name + "robot_commands.config";
+    else
+        filename = dir_name + "robot_commands.log";
+
     s.open( filename.c_str() );
 
     cout << "Opening save file : " << filename << endl;
@@ -404,31 +509,28 @@ void Converter::saveToRobotSimFormat()
         // Initializes joints to zero
         Eigen::VectorXd q(Eigen::VectorXd::Zero(mRSNbDof));
 
-//        cout << mMaps.rs_drc.size() << endl;
-//        cout << q.size() << endl;
-//        cout << (*it).size() << endl;
-
         for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
              it_map!=mMaps.or_map.end(); it_map++ )
         {
             if( it_map->second == -1 )
                 continue;
 
-            //cout << it_map->first << endl;
             q( mMaps.rs_map[it_map->first] ) = (*it)( it_map->second );
         }
 
-        s << time_on_path << "\t";
+        if( !config_file )
+        {
+            s << time_on_path << "\t";
+            time_on_path += 0.02;
+        }
+
         s << q.size() << "\t";
 
         for( int i=0; i<q.size(); i++ )
         {
             s << q(i) << " ";
         }
-
         s << endl;
-
-        time_on_path += 0.05;
     }
 
     cout << "Trajectory Saved!!!" << endl;
@@ -487,6 +589,7 @@ int main(int argc, char** argv)
     }
 
     conv.loadTrajectoryFromFiles();
-    conv.saveToRobotSimFormat();
+    conv.saveToRobotSimFormat(true); // config_file
+    conv.saveToRobotSimFormat(false); // traj
     return 0;
 }

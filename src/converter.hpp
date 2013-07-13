@@ -63,10 +63,13 @@ public:
     Converter();
     void loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj );
     void loadTrajectoryFromFiles();
-    void saveToRobotSimFormat();
-    std::list<Eigen::VectorXd> getPath() { return mPath; };
+    void saveToRobotSimFormat(bool config_file);
     void setPath();
+
+    void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
     void closeHuboHands( Eigen::VectorXd& q );
+    void closeDRCHuboHands( Eigen::VectorXd& q, double theta );
+    void printDRCHuboHands( const Eigen::VectorXd& q );
     void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
     void setHuboJointIndicies();
     void checkMaps();
