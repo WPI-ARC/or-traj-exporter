@@ -54,7 +54,7 @@ struct OpenraveTrajectory
 {
     std::vector<Eigen::VectorXd> positions;
     std::vector<Eigen::VectorXd> velocities;
-    std::vector<double> deltatime;
+    Eigen::VectorXd deltatime;
 };
 
 class Converter
@@ -63,7 +63,7 @@ public:
     Converter();
     void loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj );
     void loadTrajectoryFromFiles();
-    void saveToRobotSimFormat(bool config_file);
+    void saveToRobotSimFormat(bool config_file=false);
     void setPath();
 
     void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
@@ -73,6 +73,9 @@ public:
     void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
     void setHuboJointIndicies();
     void checkMaps();
+    void readFile( std::string filename, std::vector<Eigen::VectorXd>& values  );
+    void concatFiles();
+    bool isFinger(std::string id);
 
 private:
     std::vector<OpenraveTrajectory> mTrajs;

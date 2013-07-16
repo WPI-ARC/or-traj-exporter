@@ -36,6 +36,7 @@
 
 #include "converter.hpp"
 
+#include <iosfwd>
 #include <iostream>
 #include <fstream>
 #include <libxml2/libxml/parser.h>
@@ -271,6 +272,7 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
         }
     }
 
+    //cout << traj.deltatime.transpose() << endl;
     cout << "End trajectory parsing" << endl;
 }
 
@@ -284,7 +286,7 @@ void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_in
     {
         double alpha = i/double(nb_conf-1);
         double theta = (1-alpha)*theta_init+alpha*theta_end;
-        cout << i << " : " << theta << endl;
+        //  cout << i << " : " << theta << endl;
         closeDRCHuboHands( q_inter, theta );
         mPath.push_back( q_inter );
     }
@@ -315,6 +317,8 @@ void Converter::setPath()
                 theta = -0.2;
             if( traj_indexes[i] == 2 ) // goal
                 theta = 0.2;
+            if( traj_indexes[i] >= 3 ) // back
+                theta = -0.2;
 
             closeDRCHuboHands( q, theta ); // reset hands
 
@@ -331,10 +335,10 @@ void Converter::setPath()
         }
         if( traj_indexes[i] == 2 ) // goal
         {
-            addClosingHandsConfigs( mPath.back(), 0.2, 0 );
+            addClosingHandsConfigs( mPath.back(), 0.2, -0.2 );
         }
 
-        printDRCHuboHands( mPath.back() );
+        //printDRCHuboHands( mPath.back() );
     }
 }
 
@@ -489,6 +493,8 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
 
 void Converter::saveToRobotSimFormat(bool config_file)
 {
+    bool ach_path = true;
+    std::map<std::string,int>& m = mMaps.or_map;
     std::list<Eigen::VectorXd>::const_iterator it;
     std::ofstream s;
     std::string filename;
@@ -497,6 +503,11 @@ void Converter::saveToRobotSimFormat(bool config_file)
         filename = dir_name + "robot_commands.config";
     else
         filename = dir_name + "robot_commands.log";
+
+    if( ach_path )
+    {
+        m = mMaps.ach_map;
+    }
 
     s.open( filename.c_str() );
 
@@ -509,10 +520,11 @@ void Converter::saveToRobotSimFormat(bool config_file)
         // Initializes joints to zero
         Eigen::VectorXd q(Eigen::VectorXd::Zero(mRSNbDof));
 
-        for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
-             it_map!=mMaps.or_map.end(); it_map++ )
+        for( std::map<std::string,int>::iterator it_map=m.begin(); it_map!=m.end(); it_map++ )
         {
             if( it_map->second == -1 )
+                continue;
+            if( isFinger(it_map->first) )
                 continue;
 
             q( mMaps.rs_map[it_map->first] ) = (*it)( it_map->second );
@@ -536,10 +548,48 @@ void Converter::saveToRobotSimFormat(bool config_file)
     cout << "Trajectory Saved!!!" << endl;
 }
 
+bool Converter::isFinger(std::string id)
+{
+    std::vector<std::string> fingers(21);
+
+    fingers[0] ="LF11";           //7         Body_LWR    Body_LF11
+    fingers[1] ="LF12";           //8         Body_LF11   Body_LF12
+    fingers[2] ="LF13";           //9         Body_LF12   Body_LF13
+    fingers[3] ="LF21";          //20        Body_LWR    Body_LF21
+    fingers[4] ="LF22";          //21        Body_LF21   Body_LF22
+    fingers[5] ="LF23";          //22        Body_LF22   Body_LF23
+    fingers[6] ="LF31";          //23        Body_LWR    Body_LF31
+    fingers[7] ="LF32";          //24        Body_LF31   Body_LF32
+    fingers[8] ="LF33";          //25        Body_LF32   Body_LF33
+    fingers[9] ="RF11";          //33        Body_RWR    Body_RF11
+    fingers[10]="RF12";          //34        Body_RF11   Body_RF12
+    fingers[11]="RF13";          //35        Body_RF12   Body_RF13
+    fingers[12]="RF21";          //42        Body_RWR    Body_RF21
+    fingers[13]="RF22";          //43        Body_RF21   Body_RF22
+    fingers[14]="RF23";          //44        Body_RF22   Body_RF23
+    fingers[15]="RF31";          //45        Body_RWR    Body_RF31
+    fingers[16]="RF32";          //46        Body_RF31   Body_RF32
+    fingers[17]="RF33";          //47        Body_RF32   Body_RF33
+    fingers[18]="RF41";          //48        Body_RWR    Body_RF41
+    fingers[19]="RF42";          //49        Body_RF41   Body_RF42
+    fingers[20]="RF43";          //50        Body_RF42   Body_RF43
+
+    for(int i=0;i<int(fingers.size());i++)
+    {
+        if( id == fingers[i] )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Converter::checkMaps()
 {
-    int size_or_i =  mMaps.or_map.size();
-    int size_rs_i =  mMaps.rs_map.size();
+    int size_or_i  =  mMaps.or_map.size();
+    int size_rs_i  =  mMaps.rs_map.size();
+    int size_ach_i =  mMaps.ach_map.size();
 
     for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
          it_map!=mMaps.or_map.end(); it_map++ )
@@ -547,24 +597,120 @@ void Converter::checkMaps()
         if( it_map->second == -1 )
             continue;
 
-        cout << it_map->first  << " : " << mMaps.rs_map[it_map->first] << endl;
+        cout << it_map->first  << " : " <<  mMaps.rs_map[it_map->first] << endl;
     }
 
-    if( size_or_i == mMaps.or_map.size() && size_rs_i == mMaps.rs_map.size() )
+    if( size_rs_i == mMaps.rs_map.size() )
     {
         cout << "OR keys are in RS map :-)" << endl;
     }
+
+    for( std::map<std::string,int>::iterator it_map = mMaps.rs_map.begin();
+         it_map!=mMaps.rs_map.end(); it_map++ )
+    {
+        if( it_map->second == -1 )
+            continue;
+
+        if( isFinger( it_map->first ) )
+            continue;
+
+        cout << it_map->first  << " : " <<  mMaps.ach_map[it_map->first] << endl;
+    }
+
+    if( size_ach_i == mMaps.ach_map.size() )
+    {
+        cout << "OR keys are in ACH map :-)" << endl;
+    }
+}
+
+void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& values  )
+{
+    std::ifstream in( filename, std::ios::in );
+    if (!in){
+        cout << "file " << filename << " does not exist" << endl;
+        return;
+    }
+
+    std::string line;
+
+    while( std::getline( in, line ) )
+    {
+        Eigen::VectorXd vect( 40 ); // Hard coded number of dofs
+        std::stringstream ss( line );
+        std::string chunk;
+        int i=0;
+
+        while( std::getline( ss, chunk, ' ' ) )
+        {
+            double val;
+            if( !convert_text_to_num<double>( val, chunk, std::dec ) )
+            {
+                cout << "conversion from text failed" << endl;
+            }
+            vect(i) = val;
+            i++;
+            //cout << val << " ";
+        }
+//        cout << vect.transpose();
+//        cout << endl;
+
+        if( vect.size() > 0 )
+        {
+            values.push_back( vect );
+        }
+    }
+}
+
+void Converter::concatFiles()
+{
+    std::vector< std::vector<Eigen::VectorXd> > values(6);
+    readFile( dir_name + "home2init.traj",  values[0] );
+    readFile( dir_name + "init2start.traj", values[1] );
+    readFile( dir_name + "start2goal.traj", values[2] );
+    readFile( dir_name + "goal2start.traj", values[3] );
+    readFile( dir_name + "start2init.traj", values[4] );
+    readFile( dir_name + "init2home.traj",  values[5] );
+
+    std::string filename = dir_name + "ach_final.traj";
+
+    std::ofstream fout( filename, std::ios::out );
+
+    mPath.clear();
+
+    for(int i=0;i<int(values.size());i++)
+    {
+        for(int j=0;j<int(values[i].size());j++)
+        {
+            for(int k=0;k<int(values[i][j].size());k++)
+            {
+                fout << values[i][j][k];
+                fout << " ";
+            }
+            fout << endl;
+
+            //cout << values[i][j].maxCoeff() << endl;
+            mPath.push_back( values[i][j] );
+        }
+    }
+    cout << "Saved values ach traj in " << filename << endl;
+    saveToRobotSimFormat();
 }
 
 int main(int argc, char** argv)
 {
     bool check_map=false;
+    bool concat_ach_files=false;
 
     for(int i=1;i<argc;i++)
     {
         if(argv[i][0] == '-')
         {
-            if(0==strcmp(argv[i],"-d")) {
+            if(0==strcmp(argv[i],"-ach")) {
+                concat_ach_files = true;
+                dir_name = std::string(argv[i+1]) + "/";
+                i++;
+            }
+            else if(0==strcmp(argv[i],"-d")) {
                 dir_name = std::string(argv[i+1]) + "/";
                 i++;
             }
@@ -574,7 +720,7 @@ int main(int argc, char** argv)
                 break;
             }
             else {
-                printf("Unknown option %s",argv[i]);
+                printf("Unknown option %s\n",argv[i]);
                 return 1;
             }
         }
@@ -585,6 +731,11 @@ int main(int argc, char** argv)
     if(check_map)
     {
         conv.checkMaps();
+        return 0;
+    }
+    if(concat_ach_files)
+    {
+        conv.concatFiles();
         return 0;
     }
 

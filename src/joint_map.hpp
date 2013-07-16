@@ -12,6 +12,7 @@ public:
     void setDrcHuboV2Maps();
     std::map<std::string,int> or_map;
     std::map<std::string,int> rs_map;
+    std::map<std::string,int> ach_map;
 };
 
 void JointMaps::setHuboPlusMaps()
@@ -324,6 +325,47 @@ void JointMaps::setDrcHuboV2Maps()
 //    rs_map["RF3"]= 43;
 //    //rs_map["rightPalm"]= 44;
 
+//    ach_map[""] = ;
+    ach_map["RHY"] = 0;
+    ach_map["RHR"] = 1;
+    ach_map["RHP"] = 2;
+    ach_map["RKP"] = 3; // RKN in ACH
+    ach_map["RAP"] = 4;
+    ach_map["RAR"] = 5;
+    ach_map["LHY"] = 6;
+    ach_map["LHR"] = 7;
+    ach_map["LHP"] = 8;
+    ach_map["LKP"] = 9; // LKN in ACH
+    ach_map["LAP"] = 10;
+    ach_map["LAR"] = 11;
+    ach_map["RSP"] = 12;
+    ach_map["RSR"] = 13;
+    ach_map["RSY"] = 14;
+    ach_map["REP"] = 15; // REB in ACH
+    ach_map["RWY"] = 16;
+    ach_map["RWR"] = 17;
+    ach_map["RWP"] = 18;
+    ach_map["LSP"] = 19;
+    ach_map["LSR"] = 20;
+    ach_map["LSY"] = 21;
+    ach_map["LEP"] = 22; // LEB in ACH
+    ach_map["LWY"] = 23;
+    ach_map["LWR"] = 24;
+    ach_map["LWP"] = 25;
+    ach_map["NKY"] = 26;
+    ach_map["NK1"] = 27;
+    ach_map["NK2"] = 28;
+    ach_map["TSY"] = 29; // WST in ACH
+    ach_map["RF1"] = 30;
+    ach_map["RF2"] = 31;
+    ach_map["RF3"] = 32;
+    ach_map["RF4"] = 33;
+    ach_map["RF5"] = 34;
+    ach_map["LF1"] = 35;
+    ach_map["LF2"] = 36;
+    ach_map["LF3"] = 37;
+    ach_map["LF4"] = 38;
+    ach_map["LF5"] = 39;
 };
 
 #endif // JOINT_MAP_HPP
