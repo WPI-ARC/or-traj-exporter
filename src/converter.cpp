@@ -72,6 +72,11 @@ Converter::Converter()
 //    mMaps.setHuboPlusMaps();
 //    mMaps.setDrcHuboV1Maps();
     mMaps.setDrcHuboV2Maps();
+
+    mFromAchFile = false;
+    mToUrdf = true;
+
+    mDeltaTime = 0.02;
 }
 
 void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj )
@@ -215,7 +220,7 @@ void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory
         for(int k=0;k<int(offsets.size());k++)
         {
             if( offsets[k].second.type != "deltatime" &&
-                    offsets[k].second.robot_name != mORRobotName )
+                offsets[k].second.robot_name != mORRobotName )
             {
                 ith_value += offsets[k].second.nb_dofs;
                 continue;
@@ -286,7 +291,7 @@ void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_in
     {
         double alpha = i/double(nb_conf-1);
         double theta = (1-alpha)*theta_init+alpha*theta_end;
-        //  cout << i << " : " << theta << endl;
+        //cout << i << " : " << theta << endl;
         closeDRCHuboHands( q_inter, theta );
         mPath.push_back( q_inter );
     }
@@ -295,6 +300,7 @@ void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_in
 void Converter::setPath()
 {
     mPath.clear();
+    mTransitionIndices.clear();
 
     // Wheel turning
     std::vector<int> traj_indexes(6);
@@ -338,6 +344,7 @@ void Converter::setPath()
             addClosingHandsConfigs( mPath.back(), 0.2, -0.2 );
         }
 
+        cout << mPath.size()*mDeltaTime << " sec"<< endl; // Print the times of the transitions
         //printDRCHuboHands( mPath.back() );
     }
 }
@@ -493,8 +500,16 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
 
 void Converter::saveToRobotSimFormat(bool config_file)
 {
-    bool ach_path = true;
-    std::map<std::string,int>& m = mMaps.or_map;
+    std::map<std::string,int>& m_in = mMaps.or_map;
+    std::map<std::string,int>& m_out = mMaps.rs_map;
+
+    if( mToUrdf ){
+        m_out = mMaps.urdf_map;
+    }
+    if( mFromAchFile ) {
+        m_in = mMaps.ach_map;
+    }
+
     std::list<Eigen::VectorXd>::const_iterator it;
     std::ofstream s;
     std::string filename;
@@ -503,11 +518,6 @@ void Converter::saveToRobotSimFormat(bool config_file)
         filename = dir_name + "robot_commands.config";
     else
         filename = dir_name + "robot_commands.log";
-
-    if( ach_path )
-    {
-        m = mMaps.ach_map;
-    }
 
     s.open( filename.c_str() );
 
@@ -520,20 +530,20 @@ void Converter::saveToRobotSimFormat(bool config_file)
         // Initializes joints to zero
         Eigen::VectorXd q(Eigen::VectorXd::Zero(mRSNbDof));
 
-        for( std::map<std::string,int>::iterator it_map=m.begin(); it_map!=m.end(); it_map++ )
+        for( std::map<std::string,int>::iterator it_map=m_in.begin(); it_map!=m_in.end(); it_map++ )
         {
             if( it_map->second == -1 )
                 continue;
-            if( isFinger(it_map->first) )
+            if( mFromAchFile && isFinger(it_map->first) ) // No fingers in ach map
                 continue;
 
-            q( mMaps.rs_map[it_map->first] ) = (*it)( it_map->second );
+            q( m_out[it_map->first] ) = (*it)( it_map->second );
         }
 
         if( !config_file )
         {
             s << time_on_path << "\t";
-            time_on_path += 0.02;
+            time_on_path += mDeltaTime;
         }
 
         s << q.size() << "\t";
@@ -590,6 +600,7 @@ void Converter::checkMaps()
     int size_or_i  =  mMaps.or_map.size();
     int size_rs_i  =  mMaps.rs_map.size();
     int size_ach_i =  mMaps.ach_map.size();
+    int size_urdf_i =  mMaps.urdf_map.size();
 
     for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
          it_map!=mMaps.or_map.end(); it_map++ )
@@ -620,6 +631,23 @@ void Converter::checkMaps()
     if( size_ach_i == mMaps.ach_map.size() )
     {
         cout << "OR keys are in ACH map :-)" << endl;
+    }
+
+    for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
+         it_map!=mMaps.or_map.end(); it_map++ )
+    {
+        if( it_map->second == -1 )
+            continue;
+
+        if( isFinger( it_map->first ) )
+            continue;
+
+        cout << it_map->first  << " : " <<  mMaps.urdf_map[it_map->first] << endl;
+    }
+
+    if( size_urdf_i == mMaps.urdf_map.size() )
+    {
+        cout << "OR keys are in URDF map :-)" << endl;
     }
 }
 
@@ -664,12 +692,19 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
 void Converter::concatFiles()
 {
     std::vector< std::vector<Eigen::VectorXd> > values(6);
-    readFile( dir_name + "home2init.traj",  values[0] );
-    readFile( dir_name + "init2start.traj", values[1] );
-    readFile( dir_name + "start2goal.traj", values[2] );
-    readFile( dir_name + "goal2start.traj", values[3] );
-    readFile( dir_name + "start2init.traj", values[4] );
-    readFile( dir_name + "init2home.traj",  values[5] );
+//    readFile( dir_name + "home2init.traj",  values[0] );
+//    readFile( dir_name + "init2start.traj", values[1] );
+//    readFile( dir_name + "start2goal.traj", values[2] );
+//    readFile( dir_name + "goal2start.traj", values[3] );
+//    readFile( dir_name + "start2init.traj", values[4] );
+//    readFile( dir_name + "init2home.traj",  values[5] );
+
+    readFile( dir_name + "movetraj0.traj", values[0] );
+    readFile( dir_name + "movetraj1.traj", values[1] );
+    readFile( dir_name + "movetraj2.traj", values[2] );
+    readFile( dir_name + "movetraj3.traj", values[3] );
+    readFile( dir_name + "movetraj4.traj", values[4] );
+    readFile( dir_name + "movetraj5.traj", values[5] );
 
     std::string filename = dir_name + "ach_final.traj";
 
@@ -705,16 +740,18 @@ int main(int argc, char** argv)
     {
         if(argv[i][0] == '-')
         {
-            if(0==strcmp(argv[i],"-ach")) {
+            std::string option = argv[i];
+
+            if( option == "-ach" ) {
                 concat_ach_files = true;
                 dir_name = std::string(argv[i+1]) + "/";
                 i++;
             }
-            else if(0==strcmp(argv[i],"-d")) {
+            else if( option == "-or" || option == "-openrave" ) {
                 dir_name = std::string(argv[i+1]) + "/";
                 i++;
             }
-            else if(0==strcmp(argv[i],"-c")) {
+            else if( option == "-check" || option == "-c" ) {
                 i++;
                 check_map = true;
                 break;

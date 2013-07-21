@@ -13,6 +13,7 @@ public:
     std::map<std::string,int> or_map;
     std::map<std::string,int> rs_map;
     std::map<std::string,int> ach_map;
+    std::map<std::string,int> urdf_map;
 };
 
 void JointMaps::setHuboPlusMaps()
@@ -366,6 +367,69 @@ void JointMaps::setDrcHuboV2Maps()
     ach_map["LF3"] = 37;
     ach_map["LF4"] = 38;
     ach_map["LF5"] = 39;
+
+//    urdf_map["base0"] = 0;
+//    urdf_map["base1"] = 1;
+//    urdf_map["base2"] = 2;
+//    urdf_map["base3"] = 3;
+//    urdf_map["base4"] = 4;
+//    urdf_map["Torso"]= 5;
+    urdf_map["LSP"]= 6;
+    urdf_map["LSR"]= 7;
+    urdf_map["LSY"]= 8;
+    urdf_map["LEP"]= 9;
+    urdf_map["LWY"]= 10;
+    urdf_map["LWP"]= 11;
+    urdf_map["LWR"]= 12;
+    urdf_map["LF11"]= 13;
+    urdf_map["LF12"]= 14;
+    urdf_map["LF13"]= 15;
+    urdf_map["LF21"]= 16;
+    urdf_map["LF22"]= 17;
+    urdf_map["LF23"]= 18;
+    urdf_map["LF31"]= 19;
+    urdf_map["LF32"]= 20;
+    urdf_map["LF33"]= 21;
+    //urdf_map["leftPalm"]= 22;
+    urdf_map["NKY"]= 23;
+    urdf_map["NK1"]= 24;
+    urdf_map["NK2"]= 25;
+    urdf_map["RSP"]= 26;
+    urdf_map["RSR"]= 27;
+    urdf_map["RSY"]= 28;
+    urdf_map["REP"]= 29;
+    urdf_map["RWY"]= 30;
+    urdf_map["RWP"]= 31;
+    urdf_map["RWR"]= 32;
+    urdf_map["RF11"]= 33;
+    urdf_map["RF12"]= 34;
+    urdf_map["RF13"]= 35;
+    urdf_map["RF21"]= 36;
+    urdf_map["RF22"]= 37;
+    urdf_map["RF23"]= 38;
+    urdf_map["RF31"]= 39;
+    urdf_map["RF32"]= 40;
+    urdf_map["RF33"]= 41;
+    urdf_map["RF41"]= 42;
+    urdf_map["RF42"]= 43;
+    urdf_map["RF43"]= 44;
+//    urdf_map["rightPalm"]= 45;
+    urdf_map["TSY"]= 46;
+    urdf_map["LHY"]= 47;
+    urdf_map["LHR"]= 48;
+    urdf_map["LHP"]= 49;
+    urdf_map["LKP"]= 50;
+    urdf_map["LAP"]= 51;
+    urdf_map["LAR"]= 52;
+//    urdf_map["leftFoot"]= 53;
+    urdf_map["RHY"]= 54;
+    urdf_map["RHR"]= 55;
+    urdf_map["RHP"]= 56;
+    urdf_map["RKP"]= 57;
+    urdf_map["RAP"]= 58;
+    urdf_map["RAR"]= 59;
+//    urdf_map["rightFoot"]= 60;
+
 };
 
 #endif // JOINT_MAP_HPP

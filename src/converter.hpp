@@ -78,11 +78,17 @@ public:
     bool isFinger(std::string id);
 
 private:
+    std::vector<int> mTransitionIndices;
     std::vector<OpenraveTrajectory> mTrajs;
     std::list<Eigen::VectorXd> mPath;
     JointMaps mMaps;
     int mRSNbDof;
     std::string mORRobotName;
+    double mDeltaTime;
+
+    bool mFromAchFile;
+    bool mToUrdf;
+
 };
 
 #endif
