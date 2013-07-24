@@ -35,6 +35,6 @@ message("LIBXML2_LIBRARIES : " ${LIBXML2_LIBRARIES})
 set ( project_src src/converter.cpp )
 set ( project_hdr src/converter.hpp src/joint_map.hpp )
 
-add_executable (orTrajExporter ${project_src} ${project_hdr})
-target_link_libraries (orTrajExporter ${LIBXML2_LIBRARIES})
+add_executable (ortconv ${project_src} ${project_hdr})
+target_link_libraries (ortconv ${LIBXML2_LIBRARIES})
 

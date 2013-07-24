@@ -77,17 +77,17 @@ public:
     void concatFiles();
     bool isFinger(std::string id);
 
+    int mRSNbDof;
+    std::string mORRobotName;
+    double mDeltaTime;
+    bool mFromAchFile;
+    bool mToUrdf;
+
 private:
     std::vector<int> mTransitionIndices;
     std::vector<OpenraveTrajectory> mTrajs;
     std::vector<Eigen::VectorXd> mPath;
     JointMaps mMaps;
-    int mRSNbDof;
-    std::string mORRobotName;
-    double mDeltaTime;
-
-    bool mFromAchFile;
-    bool mToUrdf;
 
 };
 

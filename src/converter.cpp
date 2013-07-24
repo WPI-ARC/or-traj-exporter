@@ -502,8 +502,10 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
     q = hubo_config;
 }
 
-void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& paths, bool config_file )
+void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, bool config_file )
 {
+    mPath = path;
+
     std::map<std::string,int>& m_in = mMaps.or_map;
     std::map<std::string,int>& m_out = mMaps.rs_map;
 
@@ -667,7 +669,7 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
 
     while( std::getline( in, line ) )
     {
-        Eigen::VectorXd vect( 40 ); // Hard coded number of dofs
+        Eigen::VectorXd vect( 40 ); // Hard coded number of dofs (ACH)
         std::stringstream ss( line );
         std::string chunk;
         int i=0;
@@ -683,8 +685,8 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
             i++;
             //cout << val << " ";
         }
-//        cout << vect.transpose();
-//        cout << endl;
+        //cout << vect.transpose();
+        //cout << endl;
 
         if( vect.size() > 0 )
         {
@@ -779,6 +781,7 @@ int main(int argc, char** argv)
     {
        std::vector<Eigen::VectorXd> path;
        conv.readFile( file_name, path );
+       conv.mFromAchFile = true;
        conv.saveToRobotSimFormat( path );
        return 0;
     }
