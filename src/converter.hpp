@@ -62,8 +62,8 @@ class Converter
 public:
     Converter();
     void loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj );
-    void loadTrajectoryFromFiles();
-    void saveToRobotSimFormat(bool config_file=false);
+    std::vector<Eigen::VectorXd> loadTrajectoryFromFiles();
+    void saveToRobotSimFormat(const std::vector<Eigen::VectorXd>& paths, bool config_file=false);
     void setPath();
 
     void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
@@ -80,7 +80,7 @@ public:
 private:
     std::vector<int> mTransitionIndices;
     std::vector<OpenraveTrajectory> mTrajs;
-    std::list<Eigen::VectorXd> mPath;
+    std::vector<Eigen::VectorXd> mPath;
     JointMaps mMaps;
     int mRSNbDof;
     std::string mORRobotName;

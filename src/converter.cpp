@@ -44,7 +44,8 @@
 using std::cout;
 using std::endl;
 
-std::string dir_name = ".";
+std::string dir_name = "./";
+std::string file_name = "";
 
 bool fct_sort( std::pair<int,RobotAndDof> a, std::pair<int,RobotAndDof> b)
 {
@@ -365,7 +366,7 @@ void Converter::setHuboJointIndicies()
     }
 }
 
-void Converter::loadTrajectoryFromFiles()
+std::vector<Eigen::VectorXd> Converter::loadTrajectoryFromFiles()
 {
     if( mTrajs.empty() )
     {
@@ -385,7 +386,10 @@ void Converter::loadTrajectoryFromFiles()
     else
     {
         cout << "Trajectory is already loaded" << endl;
+        setPath();
     }
+
+    return mPath;
 }
 
 void Converter::closeHuboHands( Eigen::VectorXd& q )
@@ -498,7 +502,7 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
     q = hubo_config;
 }
 
-void Converter::saveToRobotSimFormat(bool config_file)
+void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& paths, bool config_file )
 {
     std::map<std::string,int>& m_in = mMaps.or_map;
     std::map<std::string,int>& m_out = mMaps.rs_map;
@@ -510,7 +514,7 @@ void Converter::saveToRobotSimFormat(bool config_file)
         m_in = mMaps.ach_map;
     }
 
-    std::list<Eigen::VectorXd>::const_iterator it;
+    std::vector<Eigen::VectorXd>::const_iterator it;
     std::ofstream s;
     std::string filename;
 
@@ -728,13 +732,14 @@ void Converter::concatFiles()
         }
     }
     cout << "Saved values ach traj in " << filename << endl;
-    saveToRobotSimFormat();
+    saveToRobotSimFormat(mPath);
 }
 
 int main(int argc, char** argv)
 {
     bool check_map=false;
     bool concat_ach_files=false;
+    bool ach_2_rs=false;
 
     for(int i=1;i<argc;i++)
     {
@@ -751,6 +756,11 @@ int main(int argc, char** argv)
                 dir_name = std::string(argv[i+1]) + "/";
                 i++;
             }
+            else if( option == "-ach2robsim" || option == "-a2rs" ) {
+                ach_2_rs = true;
+                file_name = std::string(argv[i+1]);
+                i++;
+            }
             else if( option == "-check" || option == "-c" ) {
                 i++;
                 check_map = true;
@@ -765,19 +775,29 @@ int main(int argc, char** argv)
 
     Converter conv;
 
-    if(check_map)
+    if( ach_2_rs ) // Converts from ach to robotsim format
+    {
+       std::vector<Eigen::VectorXd> path;
+       conv.readFile( file_name, path );
+       conv.saveToRobotSimFormat( path );
+       return 0;
+    }
+    else if( check_map ) // Check joint mapping
     {
         conv.checkMaps();
         return 0;
     }
-    if(concat_ach_files)
+    else if( concat_ach_files ) // Concatanate ach files
     {
         conv.concatFiles();
         return 0;
     }
+    else {
+        std::vector<Eigen::VectorXd> path;
+        path = conv.loadTrajectoryFromFiles();
+        conv.saveToRobotSimFormat(path,true); // config_file
+        conv.saveToRobotSimFormat(path,false); // traj
+    }
 
-    conv.loadTrajectoryFromFiles();
-    conv.saveToRobotSimFormat(true); // config_file
-    conv.saveToRobotSimFormat(false); // traj
     return 0;
 }
