@@ -5,9 +5,12 @@
 #include <iosfwd>
 #include <sstream>
 #include <fstream>
+#include <vector>
+#include <Eigen/Core>
 
 namespace ortconv
 {
+typedef std::vector<Eigen::VectorXd> milestones;
 
 struct RobotAndDof
 {

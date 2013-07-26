@@ -71,7 +71,7 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
             cout << "Error: no prop named offset" << endl;
             return;
         }
-        ortconv::convert_text_to_num<int>( offsets.back().first, (char*)tmp, std::dec );
+        convert_text_to_num<int>( offsets.back().first, (char*)tmp, std::dec );
         //cout << offsets.back().first << endl;
 
         tmp = xmlGetProp( node, xmlCharStrdup("dof") );
@@ -80,7 +80,7 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
             cout << "Error: no prop named offset" << endl;
             return;
         }
-        ortconv::convert_text_to_num<int>( offsets.back().second.nb_dofs, (char*)tmp, std::dec );
+        convert_text_to_num<int>( offsets.back().second.nb_dofs, (char*)tmp, std::dec );
 
         std::stringstream ss( (char *)xmlGetProp( node, xmlCharStrdup("name") ) );
         std::string line;
@@ -114,7 +114,7 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
         return;
     }
     int count = 0;
-    ortconv::convert_text_to_num<int>( count, (char*)tmp, std::dec );
+    convert_text_to_num<int>( count, (char*)tmp, std::dec );
     //cout << count << endl;
 
     tmp = xmlNodeGetContent( cur );
@@ -132,7 +132,7 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
     while( std::getline(ss,line,' ') )
     {
         double val;
-        ortconv::convert_text_to_num<double>( val, line, std::dec );
+        convert_text_to_num<double>( val, line, std::dec );
         values.push_back( val );
     }
 

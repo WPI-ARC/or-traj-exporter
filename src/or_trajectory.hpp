@@ -4,6 +4,8 @@
 #include <Eigen/Core>
 #include <string>
 
+#include "utils.hpp"
+
 namespace ortconv
 {
 class OpenraveTrajectory
@@ -12,8 +14,8 @@ public:
     OpenraveTrajectory();
     void loadTrajectoryFromFile( std::string filename );
 
-    std::vector<Eigen::VectorXd> positions;
-    std::vector<Eigen::VectorXd> velocities;
+    milestones positions;
+    milestones velocities;
     Eigen::VectorXd deltatime;
     std::string robot_name;
 };

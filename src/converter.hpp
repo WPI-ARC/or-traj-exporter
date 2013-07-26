@@ -50,8 +50,11 @@ class Converter
 {
 public:
     Converter();
-    std::vector<Eigen::VectorXd> loadTrajectoryFromFiles();
-    void saveToRobotSimFormat(const std::vector<Eigen::VectorXd>& paths, bool config_file=false);
+
+    milestones loadTrajectoryFromFiles();
+    milestones concatFiles();
+
+    void saveToRobotSimFormat(const milestones& paths, bool config_file=false);
     void setPath();
 
     void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
@@ -61,8 +64,7 @@ public:
     void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
     void setHuboJointIndicies();
     void checkMaps();
-    void readFile( std::string filename, std::vector<Eigen::VectorXd>& values  );
-    void concatFiles();
+    void readFile( std::string filename, milestones& values  );
     bool isFinger(std::string id);
 
     int mRSNbDof;

@@ -158,6 +158,11 @@ std::vector<Eigen::VectorXd> Converter::loadTrajectoryFromFiles()
         mTrajs.clear();
         mTrajs.resize(6);
 
+        for( int i=0;i<(mTrajs.size());i++) // Set robot name for the parser
+        {
+             mTrajs[i].robot_name = mORRobotName;
+        }
+
         mTrajs[0].loadTrajectoryFromFile( dir_name + "movetraj0.txt" );
         mTrajs[1].loadTrajectoryFromFile( dir_name + "movetraj1.txt" );
         mTrajs[2].loadTrajectoryFromFile( dir_name + "movetraj2.txt" );
@@ -481,9 +486,9 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
     cout << "nb of configurations : " << values.size() << endl;
 }
 
-void Converter::concatFiles()
+milestones Converter::concatFiles()
 {
-    std::vector< std::vector<Eigen::VectorXd> > values(6);
+    std::vector<milestones> values(6);
 //    readFile( dir_name + "home2init.traj",  values[0] );
 //    readFile( dir_name + "init2start.traj", values[1] );
 //    readFile( dir_name + "start2goal.traj", values[2] );
@@ -519,8 +524,8 @@ void Converter::concatFiles()
             mPath.push_back( values[i][j] );
         }
     }
-    cout << "Saved values ach traj in " << filename << endl;
-    saveToRobotSimFormat(mPath);
+
+    return mPath;
 }
 
 void print_help()
@@ -613,12 +618,14 @@ int main(int argc, char** argv)
     }
     else if( concat_ach_files ) // Concatanate ach files
     {
-        conv.concatFiles();
+        milestones path = conv.concatFiles();
+        conv.mFromAchFile = true;
+        conv.mDeltaTime = 0.002;
+        conv.saveToRobotSimFormat( path );
         return 0;
     }
     else if( openrave ) {
-        std::vector<Eigen::VectorXd> path;
-        path = conv.loadTrajectoryFromFiles();
+        milestones path = conv.loadTrajectoryFromFiles();
         conv.saveToRobotSimFormat(path,true); // config_file
         conv.saveToRobotSimFormat(path,false); // traj
         return 0;
