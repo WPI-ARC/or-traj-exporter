@@ -42,26 +42,14 @@
 #include <list>
 #include <Eigen/Core>
 #include "joint_map.hpp"
+#include "or_trajectory.hpp"
 
-struct RobotAndDof
+namespace ortconv
 {
-    int nb_dofs;
-    std::string robot_name;
-    std::string type;
-};
-
-struct OpenraveTrajectory
-{
-    std::vector<Eigen::VectorXd> positions;
-    std::vector<Eigen::VectorXd> velocities;
-    Eigen::VectorXd deltatime;
-};
-
 class Converter
 {
 public:
     Converter();
-    void loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj );
     std::vector<Eigen::VectorXd> loadTrajectoryFromFiles();
     void saveToRobotSimFormat(const std::vector<Eigen::VectorXd>& paths, bool config_file=false);
     void setPath();
@@ -88,7 +76,7 @@ private:
     std::vector<OpenraveTrajectory> mTrajs;
     std::vector<Eigen::VectorXd> mPath;
     JointMaps mMaps;
-
 };
+}
 
 #endif

@@ -32,8 +32,8 @@ message("LIBXML2_LIBRARY_DIRS : " ${LIBXML2_LIBRARY_DIRS})
 message("LIBXML2_LIBRARIES : " ${LIBXML2_LIBRARIES})
 
 # Search all header and source files
-set ( project_src src/converter.cpp )
-set ( project_hdr src/converter.hpp src/joint_map.hpp )
+set ( project_src src/converter.cpp src/or_trajectory.cpp src/utils.cpp )
+set ( project_hdr src/converter.hpp src/or_trajectory.hpp src/utils.hpp src/joint_map.hpp )
 
 add_executable (ortconv ${project_src} ${project_hdr})
 target_link_libraries (ortconv ${LIBXML2_LIBRARIES})

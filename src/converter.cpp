@@ -35,31 +35,18 @@
 /* Author: Jim Mainprice */
 
 #include "converter.hpp"
+#include "utils.hpp"
 
 #include <iosfwd>
 #include <iostream>
 #include <fstream>
-#include <libxml2/libxml/parser.h>
 
+using namespace ortconv;
 using std::cout;
 using std::endl;
 
 std::string dir_name = "./";
 std::string file_name = "";
-
-bool fct_sort( std::pair<int,RobotAndDof> a, std::pair<int,RobotAndDof> b)
-{
-    return a.first < b.first;
-}
-
-template <class T>
-bool convert_text_to_num(T& t,
-                         const std::string& s,
-                         std::ios_base& (*f)(std::ios_base&))
-{
-    std::istringstream iss(s);
-    return !(iss >> f >> t).fail();
-}
 
 Converter::Converter()
 {
@@ -78,208 +65,6 @@ Converter::Converter()
     mToUrdf = true;
 
     mDeltaTime = 0.02;
-}
-
-void Converter::loadTrajectoryFromFile( std::string filename, OpenraveTrajectory& traj )
-{
-    cout << "-------------------------------------------" << endl;
-    cout << " load file : " << filename << endl;
-
-    xmlDocPtr doc;
-    xmlNodePtr cur;
-    xmlNodePtr root;
-    xmlChar* tmp;
-
-    doc = xmlParseFile(filename.c_str());
-    if(doc==NULL)
-    {
-        cout << "Document not parsed successfully (doc==NULL)" << endl;
-        return;
-    }
-
-    root = xmlDocGetRootElement(doc);
-    if (root == NULL)
-    {
-        cout << "Document not parsed successfully" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-
-    if (xmlStrcmp(root->name, xmlCharStrdup("trajectory")))
-    {
-        cout << "Document of the wrong type root node not trajectory" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-
-    cur = root->xmlChildrenNode->next;
-
-    if (xmlStrcmp(cur->name, xmlCharStrdup("configuration")))
-    {
-        cout << "Error : no node named configuration" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-
-    std::vector< std::pair<int,RobotAndDof> > offsets;
-
-    xmlNodePtr node =  cur->xmlChildrenNode->next;
-
-    while( node != NULL )
-    {
-        //cout << xmlGetProp( node, xmlCharStrdup("name") ) << endl;
-        RobotAndDof rd;
-
-        offsets.push_back(std::make_pair(0,rd));
-
-        tmp = xmlGetProp( node, xmlCharStrdup("offset") );
-        if (tmp == NULL)
-        {
-            cout << "Error: no prop named offset" << endl;
-            return;
-        }
-        convert_text_to_num<int>( offsets.back().first, (char*)tmp, std::dec );
-        //cout << offsets.back().first << endl;
-
-        tmp = xmlGetProp( node, xmlCharStrdup("dof") );
-        if (tmp == NULL)
-        {
-            cout << "Error: no prop named offset" << endl;
-            return;
-        }
-        convert_text_to_num<int>( offsets.back().second.nb_dofs, (char*)tmp, std::dec );
-
-        std::stringstream ss( (char *)xmlGetProp( node, xmlCharStrdup("name") ) );
-        std::string line;
-
-        std::getline( ss, line, ' ' );
-        offsets.back().second.type = line;
-
-        std::getline( ss, line, ' ' );
-        offsets.back().second.robot_name = line;
-
-        node = node->next->next;
-    }
-
-    std::sort( offsets.begin(), offsets.end(), fct_sort );
-
-    // ------------------------------------------------
-    cur = cur->next->next;
-
-    if (xmlStrcmp(cur->name, xmlCharStrdup("data")))
-    {
-        cout << "Error : no node named data" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-
-    tmp = xmlGetProp( cur, xmlCharStrdup("count") );
-    if (tmp == NULL)
-    {
-        cout << "Error: no prop named count" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-    int count = 0;
-    convert_text_to_num<int>( count, (char*)tmp, std::dec );
-    //cout << count << endl;
-
-    tmp = xmlNodeGetContent( cur );
-    if (tmp == NULL)
-    {
-        cout << "Error: no prop named count" << endl;
-        xmlFreeDoc(doc);
-        return;
-    }
-
-    std::string configuration( (char*)(tmp) );
-    std::stringstream ss( configuration );
-    std::vector<double> values;
-    std::string line;
-    while( std::getline(ss,line,' ') )
-    {
-        double val;
-        convert_text_to_num<double>( val, line, std::dec );
-        values.push_back( val );
-    }
-
-    cout << "values.size() : " << values.size() << endl;
-
-    xmlFreeDoc(doc);
-
-    traj.positions.resize(count);
-    traj.velocities.resize(count);
-    traj.deltatime.resize(count);
-
-    cout << "count : " << count << endl;
-
-    int ith_value=0;
-    int configuration_offset=0;
-
-    for(int i=0;i<count;i++)
-    {
-        for(int k=0;k<int(offsets.size());k++)
-        {
-            if( offsets[k].second.type != "deltatime" &&
-                offsets[k].second.robot_name != mORRobotName )
-            {
-                ith_value += offsets[k].second.nb_dofs;
-                continue;
-            }
-
-            int start = ith_value + offsets[k].first;
-            int end = ith_value + offsets[k].first + offsets[k].second.nb_dofs;
-
-            if( end > values.size() )
-            {
-                cout << " name : "  <<  offsets[k].second.robot_name << ", ith_value : " << ith_value << endl;
-                cout << " type : " << offsets[k].second.type << endl;
-                cout << " nb of dof : " << offsets[k].second.nb_dofs << endl;
-                cout << " end : "  <<   end << endl;
-                cout << "ERROR Reading trajectory" << endl;
-                continue;
-            }
-
-            configuration_offset += offsets[k].second.nb_dofs;
-
-            if( offsets[k].second.type == "joint_values" )
-            {
-                traj.positions[i].resize( offsets[k].second.nb_dofs );
-
-                int l=0;
-                for(int j=start;j<end;j++)
-                {
-                    traj.positions[i][l++] = values[j];
-                }
-            }
-
-            if( offsets[k].second.type == "joint_velocities" )
-            {
-                traj.velocities[i].resize( offsets[k].second.nb_dofs );
-
-                int l=0;
-                for(int j=start;j<end;j++)
-                {
-                    traj.velocities[i][l++] = values[j];
-                }
-            }
-
-            if( offsets[k].second.type == "deltatime" )
-            {
-                int l=0;
-                for(int j=start;j<end;j++)
-                {
-                    traj.deltatime[i] = values[l++];
-                }
-
-                ith_value += configuration_offset;
-                configuration_offset = 0;
-            }
-        }
-    }
-
-    //cout << traj.deltatime.transpose() << endl;
-    cout << "End trajectory parsing" << endl;
 }
 
 void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end )
@@ -373,12 +158,12 @@ std::vector<Eigen::VectorXd> Converter::loadTrajectoryFromFiles()
         mTrajs.clear();
         mTrajs.resize(6);
 
-        loadTrajectoryFromFile( dir_name + "movetraj0.txt", mTrajs[0] );
-        loadTrajectoryFromFile( dir_name + "movetraj1.txt", mTrajs[1] );
-        loadTrajectoryFromFile( dir_name + "movetraj2.txt", mTrajs[2] );
-        loadTrajectoryFromFile( dir_name + "movetraj3.txt", mTrajs[3] );
-        loadTrajectoryFromFile( dir_name + "movetraj4.txt", mTrajs[4] );
-        loadTrajectoryFromFile( dir_name + "movetraj5.txt", mTrajs[5] );
+        mTrajs[0].loadTrajectoryFromFile( dir_name + "movetraj0.txt" );
+        mTrajs[1].loadTrajectoryFromFile( dir_name + "movetraj1.txt" );
+        mTrajs[2].loadTrajectoryFromFile( dir_name + "movetraj2.txt" );
+        mTrajs[3].loadTrajectoryFromFile( dir_name + "movetraj3.txt" );
+        mTrajs[4].loadTrajectoryFromFile( dir_name + "movetraj4.txt" );
+        mTrajs[5].loadTrajectoryFromFile( dir_name + "movetraj5.txt" );
 
         //setHuboJointIndicies();
         setPath();
@@ -677,7 +462,7 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
         while( std::getline( ss, chunk, ' ' ) )
         {
             double val;
-            if( !convert_text_to_num<double>( val, chunk, std::dec ) )
+            if( !ortconv::convert_text_to_num<double>( val, chunk, std::dec ) )
             {
                 cout << "conversion from text failed" << endl;
             }
@@ -693,6 +478,7 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
             values.push_back( vect );
         }
     }
+    cout << "nb of configurations : " << values.size() << endl;
 }
 
 void Converter::concatFiles()
@@ -737,11 +523,39 @@ void Converter::concatFiles()
     saveToRobotSimFormat(mPath);
 }
 
+void print_help()
+{
+    cout << "----------------------------------------------------" << endl;
+    cout << "----------------------------------------------------" << endl;
+    cout << endl;
+    cout << "        Welcome to ORTCONV" << endl;
+    cout << endl;
+    cout << " This program is used to convert trajectories" << endl;
+    cout << endl;
+    cout << "----------------------------------------------------" << endl;
+    cout << "----------------------------------------------------" << endl;
+    cout << endl;
+    cout << " Mandatory arguments to long options are mandatory for short options too." << endl;
+    cout << endl;
+    cout << "  -a,    --achconcat         concatenate ach trajectories" << endl;
+    cout << "  -a2rs, --ach2robsim        convert form ach to robotsim" << endl;
+    cout << "  -or,   --openrave          convert from operave xml trajectory" << endl;
+    cout << "  -c,    --check             check that the joint maps are correct" << endl;
+    cout << "  -d,    --directory         set the directory" << endl;
+    cout << endl;
+    cout << "Exit status:" << endl;
+    cout << "0  if OK," << endl;
+    cout << "1  if minor problems (e.g., cannot access subdirectory)," << endl;
+    cout << "2  if serious trouble (e.g., cannot access command-line argument)." << endl;
+}
+
 int main(int argc, char** argv)
 {
+    bool display_help=false;
     bool check_map=false;
     bool concat_ach_files=false;
     bool ach_2_rs=false;
+    bool openrave=false;
 
     for(int i=1;i<argc;i++)
     {
@@ -749,24 +563,25 @@ int main(int argc, char** argv)
         {
             std::string option = argv[i];
 
-            if( option == "-ach" ) {
-                concat_ach_files = true;
-                dir_name = std::string(argv[i+1]) + "/";
-                i++;
-            }
-            else if( option == "-or" || option == "-openrave" ) {
-                dir_name = std::string(argv[i+1]) + "/";
-                i++;
-            }
-            else if( option == "-ach2robsim" || option == "-a2rs" ) {
-                ach_2_rs = true;
-                file_name = std::string(argv[i+1]);
-                i++;
-            }
-            else if( option == "-check" || option == "-c" ) {
-                i++;
-                check_map = true;
+            if( option == "-h"  || option == "--help" ) {
+                display_help = true;
                 break;
+            }
+            if( option == "-a"  || option == "--achconcat" ) {
+                concat_ach_files = true;
+            }
+            else if( option == "-or" || option == "--openrave" ) {
+                openrave = true;
+            }
+            else if( option == "-a2rs"  || option == "--ach2robsim" ) {
+                ach_2_rs = true;
+            }
+            else if( option == "-c" || option == "--check" ) {
+                check_map = true;
+            }
+            else if( option == "-d"  || option == "--directory") {
+                dir_name = std::string(argv[i+1]) + "/";
+                i++;
             }
             else {
                 printf("Unknown option %s\n",argv[i]);
@@ -777,11 +592,17 @@ int main(int argc, char** argv)
 
     Converter conv;
 
+    if( display_help )
+    {
+        print_help();
+        return 0;
+    }
     if( ach_2_rs ) // Converts from ach to robotsim format
     {
        std::vector<Eigen::VectorXd> path;
        conv.readFile( file_name, path );
        conv.mFromAchFile = true;
+       conv.mDeltaTime = 0.002;
        conv.saveToRobotSimFormat( path );
        return 0;
     }
@@ -795,12 +616,13 @@ int main(int argc, char** argv)
         conv.concatFiles();
         return 0;
     }
-    else {
+    else if( openrave ) {
         std::vector<Eigen::VectorXd> path;
         path = conv.loadTrajectoryFromFiles();
         conv.saveToRobotSimFormat(path,true); // config_file
         conv.saveToRobotSimFormat(path,false); // traj
+        return 0;
     }
 
-    return 0;
+    return 1;
 }

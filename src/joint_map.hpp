@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+namespace ortconv
+{
 class JointMaps
 {
 public:
@@ -431,5 +433,6 @@ void JointMaps::setDrcHuboV2Maps()
 //    urdf_map["rightFoot"]= 60;
 
 };
+}
 
 #endif // JOINT_MAP_HPP
