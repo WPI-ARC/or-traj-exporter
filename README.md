@@ -1,4 +1,4 @@
-or-traj-exporter
+ortconv
 ================
 
-Project to convert motion trajectory files from openrave to other formats
+Motion trajectory files converter handles openrave and other formats
