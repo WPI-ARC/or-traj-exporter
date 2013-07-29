@@ -11,6 +11,7 @@
 namespace ortconv
 {
 typedef std::vector<Eigen::VectorXd> milestones;
+typedef std::vector< std::pair<double,Eigen::VectorXd> > milestones_time;
 
 struct RobotAndDof
 {
@@ -28,6 +29,21 @@ bool convert_text_to_num(T& t,
 {
     std::istringstream iss(s);
     return !(iss >> f >> t).fail();
+}
+
+template <class T>
+bool convert_text_to_vect( std::istream& in, Eigen::VectorXd& v )
+{
+    int n;
+    in >> n;
+    if(!in) return in;
+    if(n != v.size())
+        v.resize(n);
+    for(int i=0; i<v.size(); i++)
+    {
+        in >> v[i];
+    }
+    return true;
 }
 
 }

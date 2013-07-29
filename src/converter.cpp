@@ -45,8 +45,9 @@ using namespace ortconv;
 using std::cout;
 using std::endl;
 
-std::string dir_name = "./";
-std::string file_name = "";
+static std::string dir_name = "./";
+static std::string file_name = "";
+static double t_alpha = 1.0;
 
 Converter::Converter()
 {
@@ -292,6 +293,42 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
     q = hubo_config;
 }
 
+void Converter::saveToRobotSimFormat( const milestones_time& traj )
+{
+    std::ofstream s;
+    std::string filename = dir_name + "robot_commands.log";
+    s.open( filename.c_str() );
+    typedef milestones_time::const_iterator milestone_t_ptr;
+    cout << "Opening save file : " << filename << endl;
+    double t = 0.0;
+
+    for( milestone_t_ptr it=traj.begin(); it != traj.end(); it++ )
+    {
+        if( it==traj.begin() )
+        {
+            t = it->first;
+        }
+        else if ( it!=traj.begin() && t_alpha != 1.0 )
+        {
+            milestone_t_ptr it2 = it;
+            milestone_t_ptr it1 = (--it);
+            t = t + t_alpha*(it2->first-it1->first);
+            it = it2;
+        }
+
+        s << t << "\t";
+        s << it->second.size() << "\t";
+
+        for( int i=0; i<int(it->second.size()); i++ )
+        {
+            s << it->second(i) << " ";
+        }
+        s << endl;
+    }
+
+    cout << "Trajectory Saved!!!" << endl;
+}
+
 void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, bool config_file )
 {
     mPath = path;
@@ -447,7 +484,7 @@ void Converter::checkMaps()
     }
 }
 
-void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& values  )
+void Converter::readFileAch( std::string filename, std::vector<Eigen::VectorXd>& values  )
 {
     std::ifstream in( filename, std::ios::in );
     if (!in){
@@ -486,6 +523,31 @@ void Converter::readFile( std::string filename, std::vector<Eigen::VectorXd>& va
     cout << "nb of configurations : " << values.size() << endl;
 }
 
+void Converter::readFileRobotSim( std::string filename, std::vector< std::pair<double,Eigen::VectorXd> >& values  )
+{
+    std::ifstream in( filename.c_str() /*,std::ios::in*/ );
+
+    if(!in) {
+        cout << "Warning, couldn't open file : " << filename << endl;
+        return;
+    }
+
+    double t;
+    while(in) {
+        std::pair<double,Eigen::VectorXd> milestone;
+        in >> milestone.first;
+        convert_text_to_vect<double>( in, milestone.second );
+        if(in) {
+            values.push_back( milestone );
+        }
+    }
+    if(in.bad()) {
+        cout << "Error during read of file : " << filename << endl;
+        return;
+    }
+    in.close();
+}
+
 milestones Converter::concatFiles()
 {
     std::vector<milestones> values(6);
@@ -496,12 +558,12 @@ milestones Converter::concatFiles()
 //    readFile( dir_name + "start2init.traj", values[4] );
 //    readFile( dir_name + "init2home.traj",  values[5] );
 
-    readFile( dir_name + "movetraj0.traj", values[0] );
-    readFile( dir_name + "movetraj1.traj", values[1] );
-    readFile( dir_name + "movetraj2.traj", values[2] );
-    readFile( dir_name + "movetraj3.traj", values[3] );
-    readFile( dir_name + "movetraj4.traj", values[4] );
-    readFile( dir_name + "movetraj5.traj", values[5] );
+    readFileAch( dir_name + "movetraj0.traj", values[0] );
+    readFileAch( dir_name + "movetraj1.traj", values[1] );
+    readFileAch( dir_name + "movetraj2.traj", values[2] );
+    readFileAch( dir_name + "movetraj3.traj", values[3] );
+    readFileAch( dir_name + "movetraj4.traj", values[4] );
+    readFileAch( dir_name + "movetraj5.traj", values[5] );
 
     std::string filename = dir_name + "ach_final.traj";
 
@@ -561,6 +623,7 @@ int main(int argc, char** argv)
     bool concat_ach_files=false;
     bool ach_2_rs=false;
     bool openrave=false;
+    bool time_scaling=false;
 
     for(int i=1;i<argc;i++)
     {
@@ -585,7 +648,21 @@ int main(int argc, char** argv)
                 check_map = true;
             }
             else if( option == "-d"  || option == "--directory") {
+                if( i+1 >= argc ) {
+                    cout << "Error : no directory argument given" << endl;
+                    return 1;
+                }
                 dir_name = std::string(argv[i+1]) + "/";
+                i++;
+            }
+            else if( option == "-t"  || option == "--timescale") {
+                if( i+1 >= argc ) {
+                    cout << "Error : no timescale argument given" << endl;
+                    return 1;
+                }
+                time_scaling = true;
+                std::string alpha( argv[i+1] );
+                ortconv::convert_text_to_num<double>( t_alpha, alpha, std::dec );
                 i++;
             }
             else {
@@ -602,10 +679,17 @@ int main(int argc, char** argv)
         print_help();
         return 0;
     }
+    if( time_scaling )
+    {
+        milestones_time traj;
+        conv.readFileRobotSim( dir_name + "valve_turning.traj", traj );
+        conv.saveToRobotSimFormat( traj );
+        return 0;
+    }
     if( ach_2_rs ) // Converts from ach to robotsim format
     {
        std::vector<Eigen::VectorXd> path;
-       conv.readFile( file_name, path );
+       conv.readFileAch( file_name, path );
        conv.mFromAchFile = true;
        conv.mDeltaTime = 0.002;
        conv.saveToRobotSimFormat( path );

@@ -54,7 +54,8 @@ public:
     milestones loadTrajectoryFromFiles();
     milestones concatFiles();
 
-    void saveToRobotSimFormat(const milestones& paths, bool config_file=false);
+    void saveToRobotSimFormat( const milestones_time& traj );
+    void saveToRobotSimFormat( const milestones& paths, bool config_file=false);
     void setPath();
 
     void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
@@ -64,8 +65,10 @@ public:
     void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
     void setHuboJointIndicies();
     void checkMaps();
-    void readFile( std::string filename, milestones& values  );
     bool isFinger(std::string id);
+
+    void readFileAch( std::string filename, milestones& values  );
+    void readFileRobotSim( std::string filename, std::vector< std::pair<double,Eigen::VectorXd> >& values );
 
     int mRSNbDof;
     std::string mORRobotName;
