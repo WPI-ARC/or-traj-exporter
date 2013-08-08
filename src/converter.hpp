@@ -40,47 +40,56 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <Eigen/Core>
 #include "joint_map.hpp"
 #include "or_trajectory.hpp"
 
 namespace ortconv
 {
-class Converter
+class converter
 {
 public:
-    Converter();
+    converter();
 
+    // Hubo specific
+    void addClosingHandsConfigs(const Vector& q, double theta_init, double theta_end );
+    void closeHuboHands( Vector& q );
+    void closeDRCHuboHands( Vector& q, double theta );
+    void printDRCHuboHands( const Vector& q );
+    void setHuboConfiguration( Vector& q, bool is_position );
+    void setHuboJointIndicies();
+    bool isFinger(std::string id);
+
+    // Load from file
     milestones loadTrajectoryFromFiles();
     milestones concatFiles();
+    std::vector<std::string> getFilesInDirectory() const;
 
+    // Save to RobotSim Format
     void saveToRobotSimFormat( const milestones_time& traj );
     void saveToRobotSimFormat( const milestones& paths, bool config_file=false);
     void setPath();
 
-    void addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end );
-    void closeHuboHands( Eigen::VectorXd& q );
-    void closeDRCHuboHands( Eigen::VectorXd& q, double theta );
-    void printDRCHuboHands( const Eigen::VectorXd& q );
-    void setHuboConfiguration( Eigen::VectorXd& q, bool is_position );
-    void setHuboJointIndicies();
+    // Mapping
     void checkMaps();
-    bool isFinger(std::string id);
+    bool mapTrajectory( joint_map& in_map, joint_map& out_map, milestones_time& values );
+    double trajLenth( const milestones_time& values );
 
-    void readFileAch( std::string filename, milestones& values  );
-    void readFileRobotSim( std::string filename, std::vector< std::pair<double,Eigen::VectorXd> >& values );
+    // Load and read files
+    milestones  readFileAch( std::string filename );
+    milestones_time readFileRobotSim( std::string filename );
+    Vector getConfigAtTime( const milestones_time& values, double t );
 
     int mRSNbDof;
     std::string mORRobotName;
     double mDeltaTime;
     bool mFromAchFile;
     bool mToUrdf;
+    JointMaps mMaps;
 
 private:
     std::vector<int> mTransitionIndices;
-    std::vector<OpenraveTrajectory> mTrajs;
-    std::vector<Eigen::VectorXd> mPath;
-    JointMaps mMaps;
+    std::vector<openrave_trajectory> mTrajs;
+    std::vector<Vector> mPath;
 };
 }
 

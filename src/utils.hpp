@@ -42,21 +42,27 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <Eigen/Core>
+#include <map>
 
 namespace ortconv
 {
-typedef std::vector<Eigen::VectorXd> milestones;
-typedef std::vector< std::pair<double,Eigen::VectorXd> > milestones_time;
+typedef std::vector<double> Vector;
+typedef std::vector<Vector> milestones;
 
-struct RobotAndDof
+typedef std::vector< std::pair<double,Vector> > milestones_time;
+typedef milestones_time::const_iterator milestone_t_ptr;
+
+typedef std::map<std::string,int> joint_map;
+typedef std::map<std::string,int>::iterator joint_map_ptr;
+
+struct robot_and_dof
 {
     int nb_dofs;
     std::string robot_name;
     std::string type;
 };
 
-bool fct_sort( std::pair<int,RobotAndDof> a, std::pair<int,RobotAndDof> b);
+bool fct_sort( std::pair<int,robot_and_dof> a, std::pair<int,robot_and_dof> b);
 
 template <class T>
 bool convert_text_to_num(T& t,
@@ -68,7 +74,7 @@ bool convert_text_to_num(T& t,
 }
 
 template <class T>
-bool convert_text_to_vect( std::istream& in, Eigen::VectorXd& v )
+bool convert_text_to_vect( std::istream& in, Vector& v )
 {
     int n;
     in >> n;
@@ -81,6 +87,8 @@ bool convert_text_to_vect( std::istream& in, Eigen::VectorXd& v )
     }
     return true;
 }
+
+Vector interpolate( const Vector& a, const Vector& b, double u );
 
 }
 #endif // UTILS_HPP

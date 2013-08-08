@@ -49,7 +49,7 @@ static std::string dir_name = "./";
 static std::string file_name = "";
 static double t_alpha = 1.0;
 
-Converter::Converter()
+converter::converter()
 {
 //    mORRobotName = "Hubo";
 //    mORRobotName = "rlhuboplus";
@@ -68,11 +68,11 @@ Converter::Converter()
     mDeltaTime = 0.02;
 }
 
-void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_init, double theta_end )
+void converter::addClosingHandsConfigs(const Vector& q, double theta_init, double theta_end )
 {
     int nb_conf = 30;
 
-    Eigen::VectorXd q_inter = q;
+    Vector q_inter = q;
 
     for( int i=0;i<nb_conf;i++)
     {
@@ -84,7 +84,7 @@ void Converter::addClosingHandsConfigs(const Eigen::VectorXd& q, double theta_in
     }
 }
 
-void Converter::setPath()
+void converter::setPath()
 {
     mPath.clear();
     mTransitionIndices.clear();
@@ -102,7 +102,7 @@ void Converter::setPath()
     {
         for(int j=0;j<int(mTrajs[traj_indexes[i]].positions.size());j++)
         {
-            Eigen::VectorXd q = mTrajs[traj_indexes[i]].positions[j];
+            Vector q = mTrajs[traj_indexes[i]].positions[j];
 
             double theta = 0;
 
@@ -136,7 +136,7 @@ void Converter::setPath()
     }
 }
 
-void Converter::setHuboJointIndicies()
+void converter::setHuboJointIndicies()
 {
     for(int i=0;i<int(mTrajs.size());i++)
     {
@@ -152,7 +152,7 @@ void Converter::setHuboJointIndicies()
     }
 }
 
-std::vector<Eigen::VectorXd> Converter::loadTrajectoryFromFiles()
+std::vector<Vector> converter::loadTrajectoryFromFiles()
 {
     if( mTrajs.empty() )
     {
@@ -183,98 +183,98 @@ std::vector<Eigen::VectorXd> Converter::loadTrajectoryFromFiles()
     return mPath;
 }
 
-void Converter::closeHuboHands( Eigen::VectorXd& q )
+void converter::closeHuboHands( Vector& q )
 {
     // THESE ARE DART INDICES
 
     double angle = -1.3;
 
-    q( 33-6 ) = angle;
-    q( 34-6 ) = angle;
-    q( 35-6 ) = angle;
-    q( 36-6 ) = angle;
-    q( 37-6 ) = angle;
+    q[ 33-6 ] = angle;
+    q[ 34-6 ] = angle;
+    q[ 35-6 ] = angle;
+    q[ 36-6 ] = angle;
+    q[ 37-6 ] = angle;
 
-    q( 38-6 ) = angle;
-    q( 39-6 ) = angle;
-    q( 40-6 ) = angle;
-    q( 41-6 ) = angle;
-    q( 42-6 ) = angle;
+    q[ 38-6 ] = angle;
+    q[ 39-6 ] = angle;
+    q[ 40-6 ] = angle;
+    q[ 41-6 ] = angle;
+    q[ 42-6 ] = angle;
 }
 
-void Converter::closeDRCHuboHands( Eigen::VectorXd& q, double angle )
+void converter::closeDRCHuboHands( Vector& q, double angle )
 {
     // THESE ARE OR INDICES
     //double angle = 0.3;
 
-    q( mMaps.or_map["LF11"] ) = angle;
-    q( mMaps.or_map["LF12"] ) = angle;
-    q( mMaps.or_map["LF13"] ) = angle;
+    q[ mMaps.or_map["LF11"] ] = angle;
+    q[ mMaps.or_map["LF12"] ] = angle;
+    q[ mMaps.or_map["LF13"] ] = angle;
 
-    q( mMaps.or_map["LF21"] ) = angle;
-    q( mMaps.or_map["LF22"] ) = angle;
-    q( mMaps.or_map["LF23"] ) = angle;
+    q[ mMaps.or_map["LF21"] ] = angle;
+    q[ mMaps.or_map["LF22"] ] = angle;
+    q[ mMaps.or_map["LF23"] ] = angle;
 
-    q( mMaps.or_map["LF31"] ) = angle;
-    q( mMaps.or_map["LF32"] ) = angle;
-    q( mMaps.or_map["LF33"] ) = angle;
+    q[ mMaps.or_map["LF31"] ] = angle;
+    q[ mMaps.or_map["LF32"] ] = angle;
+    q[ mMaps.or_map["LF33"] ] = angle;
 
-    q( mMaps.or_map["RF11"] ) = angle;
-    q( mMaps.or_map["RF12"] ) = angle;
-    q( mMaps.or_map["RF13"] ) = angle;
+    q[ mMaps.or_map["RF11"] ] = angle;
+    q[ mMaps.or_map["RF12"] ] = angle;
+    q[ mMaps.or_map["RF13"] ] = angle;
 
-    q( mMaps.or_map["RF21"] ) = angle;
-    q( mMaps.or_map["RF22"] ) = angle;
-    q( mMaps.or_map["RF23"] ) = angle;
+    q[ mMaps.or_map["RF21"] ] = angle;
+    q[ mMaps.or_map["RF22"] ] = angle;
+    q[ mMaps.or_map["RF23"] ] = angle;
 
-    q( mMaps.or_map["RF31"] ) = angle;
-    q( mMaps.or_map["RF32"] ) = angle;
-    q( mMaps.or_map["RF33"] ) = angle;
+    q[ mMaps.or_map["RF31"] ] = angle;
+    q[ mMaps.or_map["RF32"] ] = angle;
+    q[ mMaps.or_map["RF33"] ] = angle;
 
-    q( mMaps.or_map["RF41"] ) = angle;
-    q( mMaps.or_map["RF42"] ) = angle;
-    q( mMaps.or_map["RF43"] ) = angle;
+    q[ mMaps.or_map["RF41"] ] = angle;
+    q[ mMaps.or_map["RF42"] ] = angle;
+    q[ mMaps.or_map["RF43"] ] = angle;
 }
 
-void Converter::printDRCHuboHands( const Eigen::VectorXd& q )
+void converter::printDRCHuboHands( const Vector& q )
 {
     // THESE ARE OR INDICES
     //double angle = 0.3;
 
     cout << "--------------" << endl;
-    cout << "LF11 : " << q( mMaps.or_map["LF11"] ) << endl;
-    cout << "LF12 : " << q( mMaps.or_map["LF12"] ) << endl;
-    cout << "LF13 : " << q( mMaps.or_map["LF13"] ) << endl;
+    cout << "LF11 : " << q[ mMaps.or_map["LF11"] ] << endl;
+    cout << "LF12 : " << q[ mMaps.or_map["LF12"] ] << endl;
+    cout << "LF13 : " << q[ mMaps.or_map["LF13"] ] << endl;
 
-    cout << "LF21 : " << q( mMaps.or_map["LF21"] ) << endl;
-    cout << "LF22 : " << q( mMaps.or_map["LF22"] ) << endl;
-    cout << "LF23 : " << q( mMaps.or_map["LF23"] ) << endl;
+    cout << "LF21 : " << q[ mMaps.or_map["LF21"] ] << endl;
+    cout << "LF22 : " << q[ mMaps.or_map["LF22"] ] << endl;
+    cout << "LF23 : " << q[ mMaps.or_map["LF23"] ] << endl;
 
-    cout << "LF31 : " << q( mMaps.or_map["LF31"] ) << endl;
-    cout << "LF32 : " << q( mMaps.or_map["LF32"] ) << endl;
-    cout << "LF33 : " << q( mMaps.or_map["LF33"] ) << endl;
+    cout << "LF31 : " << q[ mMaps.or_map["LF31"] ] << endl;
+    cout << "LF32 : " << q[ mMaps.or_map["LF32"] ] << endl;
+    cout << "LF33 : " << q[ mMaps.or_map["LF33"] ] << endl;
 
-    cout << "RF11 : " << q( mMaps.or_map["RF11"] ) << endl;
-    cout << "RF12 : " << q( mMaps.or_map["RF12"] ) << endl;
-    cout << "RF13 : " << q( mMaps.or_map["RF13"] ) << endl;
+    cout << "RF11 : " << q[ mMaps.or_map["RF11"] ] << endl;
+    cout << "RF12 : " << q[ mMaps.or_map["RF12"] ] << endl;
+    cout << "RF13 : " << q[ mMaps.or_map["RF13"] ] << endl;
 
-    cout << "RF21 : " << q( mMaps.or_map["RF21"] ) << endl;
-    cout << "RF22 : " << q( mMaps.or_map["RF22"] ) << endl;
-    cout << "RF23 : " << q( mMaps.or_map["RF23"] ) << endl;
+    cout << "RF21 : " << q[ mMaps.or_map["RF21"] ] << endl;
+    cout << "RF22 : " << q[ mMaps.or_map["RF22"] ] << endl;
+    cout << "RF23 : " << q[ mMaps.or_map["RF23"] ] << endl;
 
-    cout << "RF31 : " << q( mMaps.or_map["RF31"] ) << endl;
-    cout << "RF31 : " << q( mMaps.or_map["RF32"] ) << endl;
-    cout << "RF33 : " << q( mMaps.or_map["RF33"] ) << endl;
+    cout << "RF31 : " << q[ mMaps.or_map["RF31"] ] << endl;
+    cout << "RF31 : " << q[ mMaps.or_map["RF32"] ] << endl;
+    cout << "RF33 : " << q[ mMaps.or_map["RF33"] ] << endl;
 
-    cout << "RF41 : " << q( mMaps.or_map["RF41"] ) << endl;
-    cout << "RF42 : " << q( mMaps.or_map["RF42"] ) << endl;
-    cout << "RF43 : " << q( mMaps.or_map["RF43"] ) << endl;
+    cout << "RF41 : " << q[ mMaps.or_map["RF41"] ] << endl;
+    cout << "RF42 : " << q[ mMaps.or_map["RF42"] ] << endl;
+    cout << "RF43 : " << q[ mMaps.or_map["RF43"] ] << endl;
 }
 
 /// Setup hubo configuration
-void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
+void converter::setHuboConfiguration( Vector& q, bool is_position )
 {
-    Eigen::VectorXd hubo_config(57);
+    Vector hubo_config(57);
 
     for (int i = 0; i<57; i++)
     {
@@ -293,12 +293,11 @@ void Converter::setHuboConfiguration( Eigen::VectorXd& q, bool is_position )
     q = hubo_config;
 }
 
-void Converter::saveToRobotSimFormat( const milestones_time& traj )
+void converter::saveToRobotSimFormat( const milestones_time& traj )
 {
     std::ofstream s;
     std::string filename = dir_name + "robot_commands.log";
     s.open( filename.c_str() );
-    typedef milestones_time::const_iterator milestone_t_ptr;
     cout << "Opening save file : " << filename << endl;
     double t = 0.0;
 
@@ -321,7 +320,7 @@ void Converter::saveToRobotSimFormat( const milestones_time& traj )
 
         for( int i=0; i<int(it->second.size()); i++ )
         {
-            s << it->second(i) << " ";
+            s << it->second[i] << " ";
         }
         s << endl;
     }
@@ -329,7 +328,7 @@ void Converter::saveToRobotSimFormat( const milestones_time& traj )
     cout << "Trajectory Saved!!!" << endl;
 }
 
-void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, bool config_file )
+void converter::saveToRobotSimFormat( const std::vector<Vector>& path, bool config_file )
 {
     mPath = path;
 
@@ -343,7 +342,7 @@ void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, 
         m_in = mMaps.ach_map;
     }
 
-    std::vector<Eigen::VectorXd>::const_iterator it;
+    std::vector<Vector>::const_iterator it;
     std::ofstream s;
     std::string filename;
 
@@ -361,7 +360,7 @@ void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, 
     for( it=mPath.begin(); it != mPath.end(); it++ )
     {
         // Initializes joints to zero
-        Eigen::VectorXd q(Eigen::VectorXd::Zero(mRSNbDof));
+        Vector q(mRSNbDof,0.0);
 
         for( std::map<std::string,int>::iterator it_map=m_in.begin(); it_map!=m_in.end(); it_map++ )
         {
@@ -370,7 +369,7 @@ void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, 
             if( mFromAchFile && isFinger(it_map->first) ) // No fingers in ach map
                 continue;
 
-            q( m_out[it_map->first] ) = (*it)( it_map->second );
+            q[ m_out[it_map->first] ] = (*it)[ it_map->second ];
         }
 
         if( !config_file )
@@ -383,7 +382,7 @@ void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, 
 
         for( int i=0; i<q.size(); i++ )
         {
-            s << q(i) << " ";
+            s << q[i] << " ";
         }
         s << endl;
     }
@@ -391,7 +390,7 @@ void Converter::saveToRobotSimFormat( const std::vector<Eigen::VectorXd>& path, 
     cout << "Trajectory Saved!!!" << endl;
 }
 
-bool Converter::isFinger(std::string id)
+bool converter::isFinger(std::string id)
 {
     std::vector<std::string> fingers(21);
 
@@ -428,14 +427,91 @@ bool Converter::isFinger(std::string id)
     return false;
 }
 
-void Converter::checkMaps()
+double converter::trajLenth( const milestones_time& values )
+{
+    return values.back().first;
+}
+
+Vector converter::getConfigAtTime( const milestones_time& values, double t )
+{
+    if(values.empty()) {
+        cout << "Empty trajectory" << endl;
+        return Vector(1,0.0);
+    }
+    if(values.size() == 1)
+        return values[0].second;
+
+    if( t > values.back().first )
+    {
+        return values.back().second;
+    }
+    int i=0;
+    for(int j=0;j<int(values.size());j++)
+    {
+        if( t < values[j].first )
+        {
+            i = j; break;
+        }
+    }
+
+    if( i==0 )
+    {
+        return values[0].second;
+    }
+
+    int p=i-1;
+    double u=(t-values[p].first)/(values[i].first-values[p].first);
+
+    if( u < 0 || u > 1 )
+    {
+        cout << "Error in get config at time" << endl;
+        return Vector(1,0.0);
+    }
+
+    return interpolate( values[p].second, values[i].second, u );
+}
+
+bool converter::mapTrajectory( joint_map& m_in, joint_map& m_out, milestones_time& traj )
+{
+    int size_in   =  m_in.size();
+    int size_out  =  m_out.size();
+
+    if( size_in < size_out )
+    {
+        cout << "Error mapping traj, (size_in < size_out)" << endl;
+        return false;
+    }
+
+    for( milestones_time::iterator it=traj.begin(); it != traj.end(); it++ )
+    {
+        // Initializes joints to zero
+        Vector q( m_out.size(), 0.0 );
+
+        for( joint_map_ptr it_map=m_out.begin(); it_map!=m_out.end(); it_map++ )
+        {
+            q[ it_map->second ] = it->second[ m_in[it_map->first] ];
+        }
+
+        it->second = q;
+    }
+
+    if( size_in != m_in.size() || size_out != m_out.size() )
+    {
+        cout << "Error in joints mapping" << endl;
+        return false;
+    }
+
+    return true;
+}
+
+void converter::checkMaps()
 {
     int size_or_i  =  mMaps.or_map.size();
     int size_rs_i  =  mMaps.rs_map.size();
     int size_ach_i =  mMaps.ach_map.size();
     int size_urdf_i =  mMaps.urdf_map.size();
 
-    for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
+    for( joint_map_ptr it_map = mMaps.or_map.begin();
          it_map!=mMaps.or_map.end(); it_map++ )
     {
         if( it_map->second == -1 )
@@ -449,7 +525,7 @@ void Converter::checkMaps()
         cout << "OR keys are in RS map :-)" << endl;
     }
 
-    for( std::map<std::string,int>::iterator it_map = mMaps.rs_map.begin();
+    for( joint_map_ptr it_map = mMaps.rs_map.begin();
          it_map!=mMaps.rs_map.end(); it_map++ )
     {
         if( it_map->second == -1 )
@@ -466,7 +542,7 @@ void Converter::checkMaps()
         cout << "OR keys are in ACH map :-)" << endl;
     }
 
-    for( std::map<std::string,int>::iterator it_map = mMaps.or_map.begin();
+    for( joint_map_ptr it_map = mMaps.or_map.begin();
          it_map!=mMaps.or_map.end(); it_map++ )
     {
         if( it_map->second == -1 )
@@ -482,21 +558,33 @@ void Converter::checkMaps()
     {
         cout << "OR keys are in URDF map :-)" << endl;
     }
+
+    for( joint_map_ptr it_map = mMaps.hubo_map.begin(); it_map!=mMaps.hubo_map.end(); it_map++ )
+    {
+        cout << it_map->first  << " : " <<  mMaps.rs_map[it_map->first] << endl;
+    }
+
+    if( size_rs_i == mMaps.rs_map.size() )
+    {
+        cout << "HUBO keys are in RS map :-)" << endl;
+    }
 }
 
-void Converter::readFileAch( std::string filename, std::vector<Eigen::VectorXd>& values  )
+std::vector<Vector> converter::readFileAch( std::string filename )
 {
+    std::vector<Vector> values;
+
     std::ifstream in( filename, std::ios::in );
     if (!in){
         cout << "file " << filename << " does not exist" << endl;
-        return;
+        return values;
     }
 
     std::string line;
 
     while( std::getline( in, line ) )
     {
-        Eigen::VectorXd vect( 40 ); // Hard coded number of dofs (ACH)
+        Vector vect(0);
         std::stringstream ss( line );
         std::string chunk;
         int i=0;
@@ -508,33 +596,35 @@ void Converter::readFileAch( std::string filename, std::vector<Eigen::VectorXd>&
             {
                 cout << "conversion from text failed" << endl;
             }
-            vect(i) = val;
+            vect.push_back( val );
             i++;
-            //cout << val << " ";
         }
-        //cout << vect.transpose();
-        //cout << endl;
 
-        if( vect.size() > 0 )
-        {
+        if( !vect.empty() )
             values.push_back( vect );
-        }
     }
     cout << "nb of configurations : " << values.size() << endl;
+
+    if( !values.empty() )
+        cout << "nb of dofs : " << values[0].size() << endl;
+
+    return values;
 }
 
-void Converter::readFileRobotSim( std::string filename, std::vector< std::pair<double,Eigen::VectorXd> >& values  )
+std::vector< std::pair<double,Vector> > converter::readFileRobotSim( std::string filename )
 {
+    std::vector< std::pair<double,Vector> > values;
+
     std::ifstream in( filename.c_str() /*,std::ios::in*/ );
 
     if(!in) {
         cout << "Warning, couldn't open file : " << filename << endl;
-        return;
+        return values;
     }
 
     double t;
     while(in) {
-        std::pair<double,Eigen::VectorXd> milestone;
+        std::pair<double,Vector> milestone;
         in >> milestone.first;
         convert_text_to_vect<double>( in, milestone.second );
         if(in) {
@@ -543,12 +633,46 @@ void Converter::readFileRobotSim( std::string filename, std::vector< std::pair<d
     }
     if(in.bad()) {
         cout << "Error during read of file : " << filename << endl;
-        return;
+        return values;
     }
     in.close();
+    return values;
 }
 
-milestones Converter::concatFiles()
+std::vector<std::string> converter::getFilesInDirectory() const
+{
+    std::vector<std::string> files;
+    std::string key_extension("traj"); // Warning : hard coded extension name
+
+    cout << "Load directory : " << dir_name << endl;
+
+    std::string command = "ls " + dir_name;
+    FILE* fp = popen( command.c_str(), "r");
+    if (fp == NULL) {
+        cout << "ERROR in system call" << endl;
+        return files;
+    }
+
+    int PATH_MAX = 256;
+    char str[PATH_MAX];
+    while ( fgets( str, PATH_MAX, fp) != NULL ) // TODO : replace by STL
+    {
+        // Get extension of file
+        std::string filename( str );
+        filename = filename.substr(0, filename.size()-1);
+        std::string extension( filename.substr( filename.find_last_of(".") + 1 ) );
+
+        if( extension == key_extension )
+        {
+            cout << "add : " << filename << endl;
+            files.push_back( filename );
+        }
+    }
+    pclose(fp);
+    return files;
+}
+
+milestones converter::concatFiles()
 {
     std::vector<milestones> values(6);
 //    readFile( dir_name + "home2init.traj",  values[0] );
@@ -558,12 +682,19 @@ milestones Converter::concatFiles()
 //    readFile( dir_name + "start2init.traj", values[4] );
 //    readFile( dir_name + "init2home.traj",  values[5] );
 
-    readFileAch( dir_name + "movetraj0.traj", values[0] );
-    readFileAch( dir_name + "movetraj1.traj", values[1] );
-    readFileAch( dir_name + "movetraj2.traj", values[2] );
-    readFileAch( dir_name + "movetraj3.traj", values[3] );
-    readFileAch( dir_name + "movetraj4.traj", values[4] );
-    readFileAch( dir_name + "movetraj5.traj", values[5] );
+//    values[0] = readFileAch( dir_name + "movetraj0.traj");
+//    values[1] = readFileAch( dir_name + "movetraj1.traj");
+//    values[2] = readFileAch( dir_name + "movetraj2.traj");
+//    values[3] = readFileAch( dir_name + "movetraj3.traj");
+//    values[4] = readFileAch( dir_name + "movetraj4.traj");
+//    values[5] = readFileAch( dir_name + "movetraj5.traj");
+
+   std::vector<std::string> filenames = getFilesInDirectory();
+   values.resize( filenames.size() );
+   for( size_t i=0;i<values.size();i++)
+   {
+       values[i] = readFileAch( dir_name + filenames[i] );
+   }
 
     std::string filename = dir_name + "ach_final.traj";
 
@@ -672,7 +803,7 @@ int main(int argc, char** argv)
         }
     }
 
-    Converter conv;
+    converter conv;
 
     if( display_help )
     {
@@ -681,15 +812,13 @@ int main(int argc, char** argv)
     }
     if( time_scaling )
     {
-        milestones_time traj;
-        conv.readFileRobotSim( dir_name + "valve_turning.traj", traj );
+        milestones_time traj = conv.readFileRobotSim( dir_name + "valve_turning.traj" );
         conv.saveToRobotSimFormat( traj );
         return 0;
     }
     if( ach_2_rs ) // Converts from ach to robotsim format
     {
-       std::vector<Eigen::VectorXd> path;
-       conv.readFileAch( file_name, path );
+       std::vector<Vector> path = conv.readFileAch( file_name );
        conv.mFromAchFile = true;
        conv.mDeltaTime = 0.002;
        conv.saveToRobotSimFormat( path );
@@ -704,7 +833,6 @@ int main(int argc, char** argv)
     {
         milestones path = conv.concatFiles();
         conv.mFromAchFile = true;
-        conv.mDeltaTime = 0.002;
         conv.saveToRobotSimFormat( path );
         return 0;
     }

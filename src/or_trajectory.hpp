@@ -37,22 +37,22 @@
 #ifndef OR_TRAJECTORY_HPP
 #define OR_TRAJECTORY_HPP
 
-#include <Eigen/Core>
+#include <vector>
 #include <string>
 
 #include "utils.hpp"
 
 namespace ortconv
 {
-class OpenraveTrajectory
+class openrave_trajectory
 {
 public:
-    OpenraveTrajectory();
+    openrave_trajectory();
     void loadTrajectoryFromFile( std::string filename );
 
     milestones positions;
     milestones velocities;
-    Eigen::VectorXd deltatime;
+    Vector deltatime;
     std::string robot_name;
 };
 }

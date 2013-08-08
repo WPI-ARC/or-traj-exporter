@@ -36,7 +36,29 @@
 
 #include "utils.hpp"
 
-bool ortconv::fct_sort( std::pair<int,RobotAndDof> a, std::pair<int,RobotAndDof> b)
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
+bool ortconv::fct_sort( std::pair<int,robot_and_dof> a, std::pair<int,robot_and_dof> b)
 {
     return a.first < b.first;
+}
+
+ortconv::Vector ortconv::interpolate( const ortconv::Vector& a, const ortconv::Vector& b, double u )
+{
+    Vector out;
+    if( a.size() != b.size() )
+    {
+        cout << "Error in interpolate" << endl;
+        return out;
+    }
+
+    out = a;
+    for( int i=0;i<int(out.size());i++)
+    {
+        out[i] += u*(b[i]-a[i]);
+    }
+    return out;
 }

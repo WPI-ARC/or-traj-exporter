@@ -39,17 +39,18 @@
 
 #include <libxml2/libxml/parser.h>
 #include <iostream>
+#include <algorithm>
 
 using namespace ortconv;
 using std::cout;
 using std::endl;
 
-OpenraveTrajectory::OpenraveTrajectory()
+openrave_trajectory::openrave_trajectory()
 {
     robot_name = "";
 }
 
-void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
+void openrave_trajectory::loadTrajectoryFromFile( std::string filename )
 {
     cout << "-------------------------------------------" << endl;
     cout << " load file : " << filename << endl;
@@ -90,14 +91,14 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
         return;
     }
 
-    std::vector< std::pair<int,RobotAndDof> > offsets;
+    std::vector< std::pair<int,robot_and_dof> > offsets;
 
     xmlNodePtr node =  cur->xmlChildrenNode->next;
 
     while( node != NULL )
     {
         //cout << xmlGetProp( node, xmlCharStrdup("name") ) << endl;
-        RobotAndDof rd;
+        robot_and_dof rd;
 
         offsets.push_back(std::make_pair(0,rd));
 
@@ -163,7 +164,7 @@ void OpenraveTrajectory::loadTrajectoryFromFile( std::string filename )
 
     std::string configuration( (char*)(tmp) );
     std::stringstream ss( configuration );
-    std::vector<double> values;
+    Vector values;
     std::string line;
     while( std::getline(ss,line,' ') )
     {

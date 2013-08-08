@@ -40,6 +40,8 @@
 #include <string>
 #include <map>
 
+#include "utils.hpp"
+
 namespace ortconv
 {
 class JointMaps
@@ -48,10 +50,11 @@ public:
     void setHuboPlusMaps();
     void setDrcHuboV1Maps();
     void setDrcHuboV2Maps();
-    std::map<std::string,int> or_map;
-    std::map<std::string,int> rs_map;
-    std::map<std::string,int> ach_map;
-    std::map<std::string,int> urdf_map;
+    joint_map or_map;
+    joint_map rs_map;
+    joint_map ach_map;
+    joint_map urdf_map;
+    joint_map hubo_map;
 };
 
 void JointMaps::setHuboPlusMaps()
@@ -405,6 +408,55 @@ void JointMaps::setDrcHuboV2Maps()
     ach_map["LF3"] = 37;
     ach_map["LF4"] = 38;
     ach_map["LF5"] = 39;
+
+
+    // Robot joint map
+    hubo_map["RHY"] = 26;		//	Right Hip Yaw
+    hubo_map["RHR"] = 27;		//	Right Hip Roll
+    hubo_map["RHP"] = 28;		//	Right Hip Pitch
+    hubo_map["RKP"] = 29;		//	Right Knee Pitch (WARNING RKN)
+    hubo_map["RAP"] = 30;		//	Right Ankle Pitch
+    hubo_map["RAR"] = 1;		//	Right Ankle Roll
+
+    hubo_map["LHY"] = 19;		//	Left Hip Yaw
+    hubo_map["LHR"] = 20;		//	Left Hip Roll
+    hubo_map["LHP"] = 21;		//	Left Hip Pitch
+    hubo_map["LKP"] = 22;		//	Left Knee Pitch (WARNING RKN)
+    hubo_map["LAP"] = 23;		//	Left Ankle Pitch
+    hubo_map["LAR"] = 24;		//	Left Ankle Roll
+
+    hubo_map["RSP"] = 11;		//	Right Shoulder Pitch
+    hubo_map["RSR"] = 12;		//	Right Shoulder Roll
+    hubo_map["RSY"] = 13;		//	Right Shoulder Yaw
+    hubo_map["REP"] = 14;		//	Right Elbow Pitch (WARNING REB)
+    hubo_map["RWY"] = 15;		// right wrist yaw
+    hubo_map["RWR"] = 16;		// right wrist roll
+    hubo_map["RWP"] = 17;		// right wrist Pitch
+
+    hubo_map["LSP"] = 4;		//	Left Shoulder Pitch
+    hubo_map["LSR"] = 5;	    //	Left Shoulder Yaw
+    hubo_map["LSY"] = 6;		//	Left Shoulder Roll
+    hubo_map["LEP"] = 7;		//	Left Elbow Pitch (WARNING REP)
+    hubo_map["LWY"] = 8;		// left wrist yaw
+    hubo_map["LWR"] = 9;		// left wrist roll
+    hubo_map["LWP"] = 10;		// left wrist pitch
+
+    hubo_map["NKY"] = 1;		// neck yaw
+    hubo_map["NK1"] = 2;		// neck 1
+    hubo_map["NK2"] = 3;		// neck 2
+
+    hubo_map["TSY"] = 0;		//	Trunk Yaw  (WARNING WST)
+
+//    hubo_map["RF1"] = 32;		//	Right Finger
+//    hubo_map["RF2"] = 33;		//	Right Finger
+//    hubo_map["RF3"] = 34;		//	Right Finger
+//    hubo_map["RF4"] = 35;		//	Right Finger
+//    hubo_map["RF5"] = 36;		//	Right Finger
+//    hubo_map["LF1"] = 37;		//	Left Finger
+//    hubo_map["LF2"] = 38;		//	Left Finger
+//    hubo_map["LF3"] = 39;		//	Left Finger
+//    hubo_map["LF4"] = 40;		//	Left Finger
+//    hubo_map["LF5"] = 41;		//	Left Finger
 
 //    urdf_map["base0"] = 0;
 //    urdf_map["base1"] = 1;
