@@ -65,7 +65,7 @@ converter::converter()
     mFromAchFile = false;
     mToUrdf = true;
 
-    mDeltaTime = 0.02;
+    mDeltaTime = 0.040;
 }
 
 void converter::addClosingHandsConfigs(const Vector& q, double theta_init, double theta_end )
@@ -674,7 +674,7 @@ std::vector<std::string> converter::getFilesInDirectory() const
 
 milestones converter::concatFiles()
 {
-    std::vector<milestones> values(6);
+    std::vector<milestones> values;
 //    readFile( dir_name + "home2init.traj",  values[0] );
 //    readFile( dir_name + "init2start.traj", values[1] );
 //    readFile( dir_name + "start2goal.traj", values[2] );
@@ -682,19 +682,34 @@ milestones converter::concatFiles()
 //    readFile( dir_name + "start2init.traj", values[4] );
 //    readFile( dir_name + "init2home.traj",  values[5] );
 
-//    values[0] = readFileAch( dir_name + "movetraj0.traj");
-//    values[1] = readFileAch( dir_name + "movetraj1.traj");
-//    values[2] = readFileAch( dir_name + "movetraj2.traj");
-//    values[3] = readFileAch( dir_name + "movetraj3.traj");
-//    values[4] = readFileAch( dir_name + "movetraj4.traj");
-//    values[5] = readFileAch( dir_name + "movetraj5.traj");
+//    values.push_back( readFileAch( dir_name + "movetraj0.traj") );
+//    values.push_back( readFileAch( dir_name + "movetraj1.traj") );
+//    values.push_back( readFileAch( dir_name + "movetraj2.traj") );
+//    values.push_back( readFileAch( dir_name + "movetraj3.traj") );
+//    values.push_back( readFileAch( dir_name + "movetraj4.traj") );
+//    values.push_back( readFileAch( dir_name + "movetraj5.traj") );
 
-   std::vector<std::string> filenames = getFilesInDirectory();
-   values.resize( filenames.size() );
-   for( size_t i=0;i<values.size();i++)
-   {
-       values[i] = readFileAch( dir_name + filenames[i] );
-   }
+    values.push_back( readFileAch( dir_name + "movetraj0.traj" ) );
+    values.push_back( readFileAch( dir_name + "openhands_after_movetraj0.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj1.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj2.traj" ) );
+    values.push_back( readFileAch( dir_name + "closehands_before_movetraj3.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj3.traj" ) );
+    values.push_back( readFileAch( dir_name + "openhands_after_movetraj3.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj4.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj5.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj6.traj" ) );
+    values.push_back( readFileAch( dir_name + "openhands_before_movetraj7.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj7.traj" ) );
+    values.push_back( readFileAch( dir_name + "closehands_after_movetraj7.traj" ) );
+    values.push_back( readFileAch( dir_name + "movetraj8.traj" ) );
+
+   //std::vector<std::string> filenames = getFilesInDirectory();
+   // values.resize( filenames.size() );
+   //for( size_t i=0;i<values.size();i++)
+   //{
+   //    values[i] = readFileAch( dir_name + filenames[i] );
+   //}
 
     std::string filename = dir_name + "ach_final.traj";
 
@@ -774,6 +789,12 @@ int main(int argc, char** argv)
             }
             else if( option == "-a2rs"  || option == "--ach2robsim" ) {
                 ach_2_rs = true;
+                if( i+1 >= argc ) {
+                    cout << "Error : no filename argument given" << endl;
+                    return 1;
+                }
+                file_name = std::string(argv[i+1]);
+                i++;
             }
             else if( option == "-c" || option == "--check" ) {
                 check_map = true;
@@ -820,7 +841,7 @@ int main(int argc, char** argv)
     {
        std::vector<Vector> path = conv.readFileAch( file_name );
        conv.mFromAchFile = true;
-       conv.mDeltaTime = 0.002;
+       conv.mDeltaTime = 0.04;
        conv.saveToRobotSimFormat( path );
        return 0;
     }
